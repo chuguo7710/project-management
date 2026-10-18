@@ -1,0 +1,10 @@
+# 前端
+node_modules/
+dist/
+# 后端
+target/
+logs/
+.idea/
+*.iml
+# 本地配置
+.env.local

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.modules.mapper.ProjectMapper">
+
+    <select id="countSearchProjects" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM projects
+        <where>
+            <if test="name != null and name != ''">
+                AND name LIKE CONCAT('%', #{name}, '%')
+            </if>
+            <if test="leader != null and leader != ''">
+                AND leader = #{leader}
+            </if>
+        </where>
+    </select>
+
+    <select id="searchProjects" resultType="com.example.modules.entity.Project">
+        SELECT id, name, status, leader, progress, create_time, description FROM projects
+        <where>
+            <if test="name != null and name != ''">
+                AND name LIKE CONCAT('%', #{name}, '%')
+            </if>
+            <if test="leader != null and leader != ''">
+                AND leader = #{leader}
+            </if>
+        </where>
+        ORDER BY create_time DESC LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <select id="countGetProjects" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM projects p
+        JOIN project_user pu ON pu.project_id = p.id AND pu.user_id = #{userId}
+        <where>
+            <if test="name != null and name != ''">
+                AND p.name LIKE CONCAT('%', #{name}, '%')
+            </if>
+            <if test="leader != null and leader != ''">
+                AND p.leader = #{leader}
+            </if>
+        </where>
+    </select>
+
+    <select id="getProjects" resultType="com.example.modules.entity.Project">
+        SELECT p.id, p.name, p.status, p.leader, p.progress, p.create_time, p.description
+        FROM projects p
+        JOIN project_user pu ON pu.project_id = p.id AND pu.user_id = #{userId}
+        <where>
+            <if test="name != null and name != ''">
+                AND p.name LIKE CONCAT('%', #{name}, '%')
+            </if>
+            <if test="leader != null and leader != ''">
+                AND p.leader = #{leader}
+            </if>
+        </where>
+        ORDER BY create_time DESC, id DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+</mapper>

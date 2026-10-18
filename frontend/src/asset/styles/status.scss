@@ -1,0 +1,26 @@
+@use 'color.scss' as *;
+
+@mixin dot {
+  width: 12px;
+  height: 12px;
+  border: 2px solid;
+  border-radius: 50%;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.dot-active {
+  @include dot;
+  background-color: $status-active-color;
+  border-color: $status-active-border-color;
+}
+.dot-stop {
+  @include dot;
+  background-color: $status-stop-color;
+  border-color: $status-stop-border-color;
+}
+.dot-finish {
+  @include dot;
+  background-color: $status-finish-color;
+  border-color: $status-finish-border-color;
+}

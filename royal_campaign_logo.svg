@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
+  <defs>
+    <linearGradient id="navyCyan" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1A2A6C"/>
+      <stop offset="1" stop-color="#00D2FF"/>
+    </linearGradient>
+    <linearGradient id="cyanBlue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#00D2FF"/>
+      <stop offset="1" stop-color="#3A7BD5"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F9D423"/>
+      <stop offset="1" stop-color="#F5A623"/>
+    </linearGradient>
+    <radialGradient id="bg" cx="50%" cy="45%" r="70%">
+      <stop offset="0" stop-color="#14245C"/>
+      <stop offset="1" stop-color="#0E1A3A"/>
+    </radialGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="7" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="soft"><feGaussianBlur stdDeviation="2"/></filter>
+  </defs>
+
+  <rect width="1000" height="1000" rx="180" fill="url(#bg)"/>
+
+  <!-- compass / radar hub -->
+  <g fill="none" stroke="url(#cyanBlue)" stroke-linecap="round">
+    <circle cx="500" cy="480" r="310" stroke-width="3" opacity=".55"/>
+    <circle cx="500" cy="480" r="250" stroke-width="2.5" opacity=".38"/>
+    <circle cx="500" cy="480" r="185" stroke-width="2" opacity=".25"/>
+    <path d="M180 480H820 M500 160V800" stroke-width="2" opacity=".2"/>
+    <path d="M235 325 A310 310 0 0 1 420 183" stroke-width="12" opacity=".9"/>
+    <path d="M580 177 A310 310 0 0 1 755 300" stroke-width="12" opacity=".9"/>
+    <path d="M815 455 A310 310 0 0 1 748 655" stroke-width="10" opacity=".8"/>
+    <path d="M252 665 A310 310 0 0 1 190 520" stroke-width="10" opacity=".65"/>
+    <path d="M330 705 A250 250 0 0 0 670 705" stroke-width="3" opacity=".55"/>
+  </g>
+
+  <!-- speed arcs -->
+  <g fill="none" stroke-linecap="round" filter="url(#glow)">
+    <path d="M250 620 Q500 760 750 620" stroke="#00D2FF" stroke-width="5" opacity=".75"/>
+    <path d="M285 675 Q500 790 715 675" stroke="#3A7BD5" stroke-width="3" opacity=".65"/>
+    <path d="M335 595 Q500 700 665 595" stroke="#F9D423" stroke-width="4" opacity=".65"/>
+  </g>
+
+  <!-- dynamic flag: two sharp geometric cloth planes -->
+  <g transform="rotate(-15 500 500)">
+    <path d="M425 690 L425 270 L500 190 L735 315 L525 385 L690 480 L470 505 L625 605 L450 575 Z"
+          fill="url(#navyCyan)" fill-opacity=".92" stroke="#00D2FF" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M425 270 L735 315 L525 385 L470 505 L425 690 Z"
+          fill="url(#cyanBlue)" fill-opacity=".62"/>
+    <path d="M525 385 L690 480 L470 505" fill="none" stroke="#8BEFFF" stroke-width="4" opacity=".8"/>
+    <path d="M470 505 L625 605 L450 575" fill="none" stroke="#00D2FF" stroke-width="4" opacity=".75"/>
+  </g>
+
+  <!-- mountain / milestone base -->
+  <path d="M270 730 L500 485 L730 730 Z" fill="#0E1A3A" stroke="#00D2FF" stroke-width="5"/>
+  <path d="M350 730 L500 535 L650 730" fill="url(#navyCyan)" opacity=".8"/>
+  <path d="M500 535 L570 730 H430 Z" fill="#00D2FF" opacity=".18"/>
+  <path d="M500 485 L535 535 L500 570 L465 535 Z" fill="url(#gold)" filter="url(#glow)"/>
+
+  <!-- gold victory accent -->
+  <path d="M735 315 L790 285 L748 350 Z" fill="url(#gold)" filter="url(#glow)"/>
+
+  <!-- central hub -->
+  <circle cx="500" cy="480" r="12" fill="#F9D423" filter="url(#glow)"/>
+  <circle cx="500" cy="480" r="5" fill="#fff"/>
+
+  <!-- wordmark -->
+  <g text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, PingFang SC, sans-serif">
+    <text x="500" y="850" font-size="86" font-weight="800" letter-spacing="12"
+          fill="url(#cyanBlue)" stroke="#DDFBFF" stroke-width="1">御驾亲征</text>
+    <text x="500" y="900" font-size="25" letter-spacing="12" fill="#D8E8FF">ROYAL CAMPAIGN</text>
+    <text x="500" y="938" font-size="22" letter-spacing="5" fill="#7FA7D9">多租户团队协作平台</text>
+  </g>
+</svg>
