@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import PageBar from '../../components/PageBar.vue'
+
 import { ref, computed, onMounted } from 'vue'
 import dayjs from 'dayjs'
 
@@ -6,7 +8,7 @@ import { PROJECT_STATUS } from '@/types/project'
 
 import { useProjectStore } from '@/stores/project'
 
-import '@/asset/styles/status.scss'
+import '@/assets/styles/status.scss'
 // 外部依赖
 const projectStore = useProjectStore()
 const { listSlice } = projectStore
@@ -27,12 +29,6 @@ const handleDescription = (rowDescription: string) => {
   currentDescription.value = rowDescription
   isDescriptionDialogVisible.value = true
 }
-const handlePageSizeChange = () => {
-  load(1) // 每页条数改变，回到第一页
-}
-const handleCurrentPageChange = () => {
-  load() // 当前页改变，加载当前页数据
-}
 
 // 初始化
 const initData = () => {
@@ -45,8 +41,8 @@ onMounted(() => {
 })
 </script>
 <template>
+  <!-- 项目列表 -->
   <div class="project-list">
-    <action-bar />
     <el-divider />
     <el-table :data="projectList" border stripe style="width: 100%">
       <el-table-column prop="displayedId" label="ID" width="80" />
@@ -72,20 +68,17 @@ onMounted(() => {
       </el-table-column>
     </el-table>
   </div>
+  <!-- /项目列表 -->
 
   <!-- 分页栏 -->
-  <div class="pagination" v-show="hasProject">
-    <el-pagination
-      background
-      layout="sizes, prev, pager, next"
-      :page-sizes="[5, 10, 20, 50]"
-      :total="pageState.total"
-      v-model:current-page="pageState.page"
-      v-model:page-size="pageState.pageSize"
-      @size-change="handlePageSizeChange"
-      @current-change="handleCurrentPageChange"
-    />
-  </div>
+  <PageBar
+    v-show="hasProject"
+    v-model:page="pageState.page"
+    v-model:pageSize="pageState.pageSize"
+    :total="pageState.total"
+    :pageSizes="[5, 10, 20, 50]"
+    @change="load()"
+  />
 
   <!-- 项目介绍Dialog -->
   <el-dialog v-model="isDescriptionDialogVisible" title="项目介绍" width="500">
@@ -95,11 +88,6 @@ onMounted(() => {
   </el-dialog>
 </template>
 <style scoped>
-.pagination {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-}
 .description {
   background-color: #ebebeb;
   border-radius: 3%;

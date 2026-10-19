@@ -1,113 +1,181 @@
 <script setup lang="ts">
 import dayjs from 'dayjs'
+import { ref, computed } from 'vue'
 
-import { useProjectDelete } from '../composables/useProjectDelete'
 import { PROJECT_STATUS } from '@/types/project'
 import type { Project } from '@/types/project'
 
-import '@/asset/styles/status.scss'
+import { useUserStore } from '@/stores/user'
 
-const { deleteProject } = useProjectDelete()
+import '@/assets/styles/status.scss'
+
 // 定义 props，父组件必须传 project
 const props = defineProps<{
   currentProject: Project
 }>()
+
+const emit = defineEmits<{
+  delete: [deletedProject: Project]
+}>()
+// 外部依赖
+const userStore = useUserStore()
 // 配置
 const statusClass = (status: number): string => PROJECT_STATUS[status]?.class ?? ''
 const statusText = (status: number): string => PROJECT_STATUS[status]?.text ?? '未知'
-
+// 内部数据
+const canEdit = computed(() => props.currentProject.leader === userStore.userData?.username)
+const canManage = canEdit
+const canDelete = canEdit
 // 派生
 const formatDate = (datetime?: string): string =>
   datetime ? dayjs(datetime).format('YYYY-MM-DD') : '-'
-const handleDelete = (id: number) => {
-  deleteProject(id)
-}
+
+const handleEdit = () => {}
+const handleMembers = () => {}
+const handleBoard = () => {}
 </script>
 <template>
   <div class="project-card">
-    <!-- 标题行：图标 + 名称 + 状态 -->
-    <div class="title">
-      <span>{{ currentProject.name }}</span>
-      <span>
-        <span :class="statusClass(currentProject.status)"></span>
-        {{ statusText(currentProject.status) }}
-      </span>
+    <div class="main">
+      <!-- 标题行：图标 + 名称 + 状态 -->
+      <div class="title">
+        <span class="project-name">{{ currentProject.name }}</span>
+        <span>
+          <span :class="statusClass(currentProject.status)"></span>
+          {{ statusText(currentProject.status) }}
+        </span>
+      </div>
+      <!-- 分割线 -->
+      <el-divider style="margin: 4px 0" />
+      <!-- 信息行：负责人、成员数、进度 -->
+      <div class="info-row">
+        <!-- 负责人 -->
+        <div class="info-item">
+          <span class="label">负责人：</span>
+          <span class="leader">{{ currentProject.leader }}</span>
+        </div>
+        <!-- 成员数、进度 -->
+        <div class="info-item">
+          <span class="label">成员：</span>
+          <span>{{ currentProject.memberCount ?? 0 }}</span>
+          <span class="label">进度：</span>
+          <el-progress
+            :percentage="currentProject.progress"
+            :stroke-width="8"
+            :show-text="false"
+            style="width: 80px; display: inline-block; vertical-align: middle"
+          />
+          <span class="progress-text">{{ currentProject.progress }}%</span>
+        </div>
+        <!-- 创建时间 -->
+        <div class="create-time">创建时间：{{ formatDate(currentProject.createTime) }}</div>
+      </div>
+
+      <!-- 操作按钮 -->
+      <div class="actions">
+        <el-tooltip content="只有项目负责人可以编辑" :disabled="canEdit" placement="top">
+          <el-button type="primary" link :disabled="!canEdit" @click="handleEdit">编辑</el-button>
+        </el-tooltip>
+
+        <el-tooltip content="只有项目负责人可以管理成员" :disabled="canManage" placement="top">
+          <el-button type="primary" link :disabled="!canManage" @click="handleMembers"
+            >成员管理</el-button
+          >
+        </el-tooltip>
+
+        <el-button type="primary" link @click="handleBoard">进入看板</el-button>
+
+        <el-tooltip content="只有项目负责人可以删除" :disabled="canDelete">
+          <el-button
+            type="danger"
+            link
+            :disabled="!canDelete"
+            @click="emit('delete', currentProject)"
+          >
+            删除</el-button
+          >
+        </el-tooltip>
+      </div>
     </div>
-
-    <!-- 分割线 -->
-    <el-divider style="margin: 12px 0" />
-
     <!-- 描述 -->
     <div class="description">
-      {{ currentProject.description || '暂无描述' }}
-    </div>
-
-    <!-- 信息行：负责人、成员数、进度 -->
-    <div class="info-row">
-      <span class="info-item">
-        <span class="label">负责人：</span>
-        <span>{{ currentProject.leader }}</span>
-      </span>
-      <span class="info-item">
-        <span class="label">成员：</span>
-        <span>{{ currentProject.memberCount ?? 0 }}</span>
-      </span>
-      <span class="info-item progress-item">
-        <span class="label">进度：</span>
-        <el-progress
-          :percentage="currentProject.progress"
-          :stroke-width="8"
-          :show-text="false"
-          style="width: 80px; display: inline-block; vertical-align: middle"
-        />
-        <span class="progress-text">{{ currentProject.progress }}%</span>
-      </span>
-    </div>
-
-    <!-- 创建时间 -->
-    <div class="create-time">创建时间：{{ formatDate(currentProject.createTime) }}</div>
-
-    <!-- 操作按钮 -->
-    <div class="actions">
-      <el-button v-if="currentProject.isLeader" type="primary" link size="small" @click="">
-        编辑
-      </el-button>
-      <el-button v-if="currentProject.isLeader" type="primary" link size="small" @click="">
-        成员管理
-      </el-button>
-      <el-button
-        v-if="currentPro ject.isLeader"
-        type="danger"
-        link
-        size="small"
-        @click="handleDelete(currentProject.id)"
-      >
-        删除
-      </el-button>
-      <el-button type="success" link size="small" @click=""> 进入看板 </el-button>
+      <div class="description-title">项目描述：</div>
+      <el-scrollbar class="description-text">{{
+        currentProject.description || '暂无描述'
+      }}</el-scrollbar>
     </div>
   </div>
 </template>
-<style scoped>
+<style scoped lang="scss">
+@use '@/assets/styles/color.scss' as *;
 .project-card {
   width: 700px;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 16px;
+  height: 220px;
   margin: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-.title {
+  padding: 8px 14px;
+  border: 1px solid $border-color;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px $shadow-color;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 18px;
-  font-weight: bold;
-}
-.info-row {
-  width: 400px;
-  display: flex;
-  justify-content: space-between;
-  margin-top: 12px;
+  .main {
+    flex: 0 0 350px;
+    display: flex;
+    flex-direction: column;
+    .title {
+      padding: 8px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 18px;
+      font-weight: bold;
+      .project-name {
+        flex: 1;
+        min-width: 0;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
+        overflow-wrap: anywhere;
+      }
+    }
+    .info-row {
+      margin-top: auto;
+      gap: 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: flex-start;
+    }
+    .actions {
+      height: 32px;
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+    }
+  }
+  .description {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    margin: 8px 0 8px 10px;
+    border-left: 1px solid $border-color;
+    padding-left: 10px;
+    color: $text-secondary-color;
+    .description-title {
+      flex: 0 0 auto;
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .description-text {
+      flex: 1;
+      min-height: 0;
+      font-size: 14px;
+      padding: 10px 0 0 10px;
+      border-radius: 6px;
+      background-color: $background-color;
+      overflow-wrap: anywhere;
+    }
+  }
 }
 </style>

@@ -42,7 +42,7 @@ export const useProjectStore = defineStore('project', () => {
         status: projectForm.value.status,
         leader: userStore.userData?.username ?? '',
         progress: projectForm.value.progress,
-        createTime: dayjs().format('YYYY-MM-DD hh:mm:ss'),
+        createTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
         description: projectForm.value.description,
       }
       const res = await createProject(payload)

@@ -8,7 +8,6 @@ export interface Project {
   progress: number
   createTime: string
   description: string
-  isLeader?: boolean // 是否能进行编辑和删除操作
   memberCount?: number
 }
 export const createEmptyProject = (): Project => ({

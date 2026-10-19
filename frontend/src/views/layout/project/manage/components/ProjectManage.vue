@@ -1,24 +1,37 @@
 <script lang="ts" setup>
+import ProjectCard from './ProjectCard.vue'
+import PageBar from '../../components/PageBar.vue'
 import { onMounted, computed } from 'vue'
 
+import { ElMessageBox, ElMessage } from 'element-plus'
+
+import { useProjectDelete } from '../composables/useProjectDelete'
+
+import type { Project } from '@/types/project'
 import { useProjectStore } from '@/stores/project'
 
-import ProjectCard from './ProjectCard.vue'
 // 外部依赖
+const { removeProject } = useProjectDelete()
+
 const projectStore = useProjectStore()
 const { manageSlice } = projectStore
 const { pageState, load } = manageSlice
 const projectList = computed(() => pageState.list)
+// 事件处理
+const askDelete = async (deletedProject: Project) => {
+  try {
+    await ElMessageBox.confirm(`确认删除项目 「${deletedProject.name}」 吗？`, '确认删除', {
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
+  } catch {
+    return
+  }
+  await removeProject(deletedProject.id)
+}
 // 派生
 const hasProject = computed(() => projectList.value.length > 0)
-// 事件处理
-const handlePageSizeChange = () => {
-  load(1) // 每页条数改变，回到第一页
-}
-const handleCurrentPageChange = () => {
-  load() // 当前页改变，加载当前页数据
-}
-
 // 初始化
 const initData = () => {
   if (pageState.loaded === false) {
@@ -30,24 +43,22 @@ onMounted(() => {
 })
 </script>
 <template>
+  <!-- 项目卡片列表 -->
   <ProjectCard
     v-for="project in projectList"
     :key="project.displayedId"
     :currentProject="project"
+    @delete="askDelete"
   />
   <!-- 分页栏 -->
-  <div class="pagination" v-show="hasProject">
-    <el-pagination
-      background
-      layout="sizes, prev, pager, next"
-      :page-sizes="[5, 10, 20, 50]"
-      :total="pageState.total"
-      v-model:current-page="pageState.page"
-      v-model:page-size="pageState.pageSize"
-      @size-change="handlePageSizeChange"
-      @current-change="handleCurrentPageChange"
-    />
-  </div>
+  <PageBar
+    v-show="hasProject"
+    v-model:page="pageState.page"
+    v-model:pageSize="pageState.pageSize"
+    :total="pageState.total"
+    :pageSizes="[5, 10, 20, 30]"
+    @change="load()"
+  />
 </template>
 <style scoped>
 .pagination {
