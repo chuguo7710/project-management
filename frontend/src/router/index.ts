@@ -7,17 +7,30 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      redirect: '/login',
+      redirect: { name: 'login' },
     },
     {
-      path: '/login',
-      name: 'login',
-      component: () => import('@/views/login/LoginView.vue'),
+      path: '/auth',
+      name: 'auth',
+      redirect: { name: 'login' },
+      component: () => import('@/views/auth/AuthView.vue'),
+      children: [
+        {
+          path: 'login',
+          name: 'login',
+          component: () => import('@/views/auth/login/LoginView.vue'),
+        },
+        {
+          path: 'register',
+          name: 'register',
+          component: () => import('@/views/auth/register/RegisterView.vue'),
+        },
+      ],
     },
     {
       path: '/layout',
       name: 'layout',
-      redirect: 'layout/dashboard',
+      redirect: { name: 'dashboard' },
       component: () => import('@/views/layout/LayoutView.vue'),
       children: [
         {
@@ -85,7 +98,7 @@ router.beforeEach((to, from) => {
   // 如果token为空，则跳转到登录页
   console.log('未登录')
 
-  if (to.name === 'login') {
+  if (to.name === 'login' || to.name === 'register') {
     return true // 如果是登录页，则放行
   }
   console.log('自动跳转到登录页')
