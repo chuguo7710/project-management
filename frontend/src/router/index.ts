@@ -71,37 +71,29 @@ const router = createRouter({
 
 // 守卫
 router.beforeEach((to, from) => {
-  const store = useUserStore()
-  console.log('路由守卫触发,token:', store.token, 'to:', to.name, 'from:', from.name)
-  // 读取token并验证
-  if (store.token) {
+  const userStore = useUserStore()
+  console.log('路由守卫触发,token:', userStore.token, 'to:', to.name, 'from:', from.name)
+  // 有token时读取token并验证
+  if (userStore.token) {
     try {
-      console.log('token验证中')
-      store.tokenValid()
       // 首次获取用户数据
-      if (store.isDataFetched === false) {
-        console.log('用户数据获取中')
-        store.fetchUserAllData()
-        store.isDataFetched = true
-        console.log('用户数据获取成功')
+      if (userStore.isDataFetched === false) {
+        userStore.fetchUserAllData()
+        userStore.isDataFetched = true
       }
       if (to.name === 'login') {
-        return { name: 'dashboard' } // 如果已经登录仍访问登录页，则自动跳转到首页
+        return { name: 'layout' } // 如果已经登录仍访问登录页，则自动跳转到首页
       }
       return true // 如果登录后访问其他页面，则放行
     } catch {
-      console.log('token验证失败')
       ElMessage.error('未登录，请登录')
       return { name: 'login' } // 如果验证失败，则跳转到登录页
     }
   }
   // 如果token为空，则跳转到登录页
-  console.log('未登录')
-
   if (to.name === 'login' || to.name === 'register') {
     return true // 如果是登录页，则放行
   }
-  console.log('自动跳转到登录页')
   return { name: 'login' } // 如果不是登录页，则跳转到登录页
 })
 

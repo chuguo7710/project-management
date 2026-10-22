@@ -57,6 +57,8 @@ const handleBoard = () => {}
         <div class="info-item">
           <span class="label">成员：</span>
           <span>{{ currentProject.memberCount ?? 0 }}</span>
+        </div>
+        <div class="info-item">
           <span class="label">进度：</span>
           <el-progress
             :percentage="currentProject.progress"
@@ -130,6 +132,7 @@ const handleBoard = () => {}
       .project-name {
         flex: 1;
         min-width: 0;
+        margin-right: 10px;
         display: -webkit-box;
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 2;

@@ -56,12 +56,13 @@ const emit = defineEmits<{
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin: 0 0 24px 10px;
 }
 .search-bar {
   width: 800px;
   display: flex;
   flex-direction: row;
   align-items: center;
+  gap: 10px;
 }
 </style>

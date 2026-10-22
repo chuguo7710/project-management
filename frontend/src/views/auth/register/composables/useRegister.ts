@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import { userRegister } from '@/api/user'
+import { userRegiste } from '@/api/user'
 
 import { ElMessage } from 'element-plus'
 
@@ -14,7 +14,7 @@ export const useRegister = () => {
     if (isRegisterLoading.value) return false
     isRegisterLoading.value = true
     try {
-      const res = await userRegister(data)
+      const res = await userRegiste(data)
       if (res.code === 1) {
         ElMessage.success('注册成功')
         data.password = ''

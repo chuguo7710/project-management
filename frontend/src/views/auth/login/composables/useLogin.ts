@@ -1,5 +1,4 @@
 import { ref } from 'vue'
-import router from '@/router'
 import { userLogin } from '@/api/user'
 
 import { ElMessage } from 'element-plus'

@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ContextData {
-    private Long id;
+    private Long userId;
     private Role role;
 }

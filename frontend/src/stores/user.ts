@@ -1,26 +1,9 @@
-import { reactive, ref } from 'vue'
+import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import request from '@/utils/request'
 import router from '@/router'
-import type { ApiResult } from '@/types/common'
+import { userFetchAllData } from '@/api/user'
 
-interface UserData {
-  username: string
-  avatar: string
-  role: number
-  createTime: string
-}
-interface UserProfileData {
-  nickname: string
-  avatar: string
-  gender: number
-  bio: string
-  updateTime: string
-}
-interface UserAllData {
-  userVO: UserData
-  userProfileVO: UserProfileData
-}
+import type { UserData, UserProfileData } from '@/types/user'
 
 export const useUserStore = defineStore('user', () => {
   // 共享状态
@@ -54,33 +37,24 @@ export const useUserStore = defineStore('user', () => {
     resetStore()
     router.push({ name: 'login' })
   }
+
   // api方法
-  /**
-   * 验证token是否有效
-   *
-   * 通过get请求utils/tokenValid：成功code=1，失败code=0
-   * @returns 成功返回true，失败抛出异常
-   */
-  const tokenValid = async (): Promise<boolean> => {
-    const response = await request.get<ApiResult>('utils/tokenValid')
-    if (response.data.code === 1) {
-      return true
-    } else {
-      throw new Error()
-    }
-  }
   /**
    * 获取用户所有数据
    *
    * 通过get请求utils/fetchUserAllData：成功data=userVO+userProfileVO，失败401
-   * @returns 成功返回true，失败抛出异常
    */
   const fetchUserAllData = async (): Promise<void> => {
-    const response = await request.get<ApiResult<UserAllData>>('utils/fetchUserAllData')
-    userData.value = response.data.data.userVO
-    userProfileData.value = response.data.data.userProfileVO
+    if (isDataFetched.value) return
+    const res = await userFetchAllData()
+    if (res.code !== 1) {
+      throw new Error('获取用户数据失败')
+    }
+    userData.value = res.data.userVO
+    userProfileData.value = res.data.userProfileVO
     isDataFetched.value = true
   }
+
   return {
     isDataFetched,
     token,
@@ -90,7 +64,6 @@ export const useUserStore = defineStore('user', () => {
     setUserData,
     setUserProfileData,
     logout,
-    tokenValid,
     fetchUserAllData,
   }
 })
