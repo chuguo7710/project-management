@@ -21,12 +21,7 @@ export const useProjectStore = defineStore('project', () => {
   const listSlice = createProjectListSlice(fetchProjectList)
   const manageSlice = createProjectListSlice(fetchMyProjects)
 
-  // 清空创建项目表单方法
-  /**
-   * 重置创建项目表单
-   *
-   * 项目表单对象为projectForm\<Project\>
-   */
+  // 重置表单
   const resetForm = () => {
     projectForm.value = createEmptyProject()
   }

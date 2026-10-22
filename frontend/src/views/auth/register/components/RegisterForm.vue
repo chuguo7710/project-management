@@ -4,12 +4,13 @@ import router from '@/router'
 
 import { ElInput, ElButton } from 'element-plus'
 
-import type { RegisterFormData } from '../composables/useRegisterForm'
-import { useRegisterForm } from '../composables/useRegisterForm'
+import type { RegisterFormData } from '@/types/user'
+import { useRegister } from '../composables/useRegister'
+
 // 外部依赖
-const { register } = useRegisterForm()
+const { register } = useRegister()
 // 内部状态
-const isLoading = ref(false)
+const isRegisterLoading = ref(false)
 // 内部数据
 const formLabelAlign = reactive<RegisterFormData>({
   username: '',
@@ -21,13 +22,12 @@ const clickLogin = () => {
   router.push({ name: 'login' })
 }
 const handleRegister = async () => {
-  if (isLoading.value) return
-  isLoading.value = true
+  isRegisterLoading.value = true
   const res = await register(formLabelAlign)
   if (res) {
     await router.push({ name: 'login' })
   }
-  isLoading.value = false
+  isRegisterLoading.value = false
 }
 // 派生
 const passwordInputRef = ref<InstanceType<typeof ElInput> | null>(null)
@@ -78,7 +78,11 @@ function focusRePassword() {
     </el-form>
 
     <div class="register-form-btn">
-      <el-button class="register-btn" type="primary" :loading="isLoading" @click="handleRegister"
+      <el-button
+        class="register-btn"
+        type="primary"
+        :loading="isRegisterLoading"
+        @click="handleRegister"
         >注册</el-button
       >
       <span class="login-btn" @click="clickLogin">登录</span>

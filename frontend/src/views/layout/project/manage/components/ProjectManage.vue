@@ -1,13 +1,13 @@
 <script lang="ts" setup>
 import ProjectCard from './ProjectCard.vue'
 import PageBar from '../../components/PageBar.vue'
+
 import { onMounted, computed } from 'vue'
 
-import { ElMessageBox, ElMessage } from 'element-plus'
-
-import { useProjectDelete } from '../composables/useProjectDelete'
+import { ElMessageBox } from 'element-plus'
 
 import type { Project } from '@/types/project'
+import { useProjectDelete } from '../composables/useProjectDelete'
 import { useProjectStore } from '@/stores/project'
 
 // 外部依赖

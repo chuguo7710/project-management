@@ -4,19 +4,29 @@ import router from '@/router'
 
 import { ElInput, ElButton } from 'element-plus'
 
-import { useLoginForm } from '../composables/useLoginForm'
-import type { LoginFormData } from '../composables/useLoginForm'
+import type { LoginFormData } from '@/types/user'
+import { useLogin } from '../composables/useLogin'
 
 // 外部依赖
-const { login } = useLoginForm()
+const { login } = useLogin()
+// 内部状态
+const isLoginLoading = ref(false)
 // 内部数据
-const formLabelAlign = reactive<LoginFormData>({
+const loginFormData = reactive<LoginFormData>({
   username: '',
   password: '',
 })
 // 事件处理
 const clickRegister = () => {
   router.push({ name: 'register' })
+}
+const handleLogin = async () => {
+  isLoginLoading.value = true
+  const res = await login(loginFormData)
+  if (res) {
+    await router.push({ name: 'dashboard' })
+  }
+  isLoginLoading.value = false
 }
 // 派生
 const passwordInputRef = ref<InstanceType<typeof ElInput> | null>(null)
@@ -32,11 +42,11 @@ function focusPassword() {
       class="login-form-content"
       label-position="right"
       label-width="auto"
-      :model="formLabelAlign"
+      :model="loginFormData"
     >
       <el-form-item label="账户名">
         <el-input
-          v-model="formLabelAlign.username"
+          v-model="loginFormData.username"
           autocomplete="off"
           placeholder="请输入用户名"
           @keyup.enter="focusPassword"
@@ -45,17 +55,19 @@ function focusPassword() {
       <el-form-item label="密码">
         <el-input
           ref="passwordInputRef"
-          v-model="formLabelAlign.password"
+          v-model="loginFormData.password"
           autocomplete="off"
           placeholder="请输入用户密码"
           :show-password="true"
-          @keyup.enter="login(formLabelAlign)"
+          @keyup.enter="handleLogin"
         />
       </el-form-item>
     </el-form>
 
     <div class="login-form-btn">
-      <el-button class="login-btn" type="primary" @click="login(formLabelAlign)">登录</el-button>
+      <el-button class="login-btn" type="primary" :loading="isLoginLoading" @click="handleLogin"
+        >登录</el-button
+      >
       <span class="register-btn" @click="clickRegister">注册</span>
     </div>
   </div>

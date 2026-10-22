@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import dayjs from 'dayjs'
-import { ref, computed } from 'vue'
+import { computed } from 'vue'
 
 import { PROJECT_STATUS } from '@/types/project'
 import type { Project } from '@/types/project'
-
 import { useUserStore } from '@/stores/user'
 
 import '@/assets/styles/status.scss'

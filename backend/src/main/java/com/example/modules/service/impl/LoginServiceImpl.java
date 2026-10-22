@@ -4,12 +4,14 @@ import com.example.common.enums.Role;
 import com.example.common.exception.BusinessException;
 import com.example.common.utils.JwtTools;
 import com.example.modules.dto.LoginDTO;
+import com.example.modules.dto.RegisterDTO;
 import com.example.modules.entity.CreateToken;
 import com.example.modules.mapper.LoginMapper;
 import com.example.modules.service.LoginService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -40,6 +42,14 @@ public class LoginServiceImpl implements LoginService {
             log.info("账户\"{}\"ID获取失败", username);
             throw new BusinessException("账户ID获取失败");
         }
+    }
 
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void register(RegisterDTO registerDTO) {
+        log.info("账户\"{}\"尝试注册服务", registerDTO.getUsername());
+        loginMapper.registerUser(registerDTO);
+        Long userId = registerDTO.getId();
+        loginMapper.initUserProfile(userId);
     }
 }
