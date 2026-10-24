@@ -19,6 +19,7 @@
 
     <!-- project + leader名字：SELECT -->
     <sql id="projectColumns">
+        (SELECT COUNT(*) FROM project_account mc WHERE mc.project_id = p.project_id) AS member_count,
         p.project_id, p.project_name, p.status, p.leader_id, p.progress,
         p.create_time, p.description,
         a.username AS leader_name

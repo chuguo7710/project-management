@@ -21,12 +21,8 @@ public interface UserMapper {
     @Select("SELECT role, status FROM accounts WHERE user_id = #{userId}")
     SessionInfo selectRoleAndStatusByUserId(@Param("userId") Long userId);
 
-    /** 拦截器日志：根据id查询账号名 */
-    @Select("SELECT username FROM accounts WHERE user_id = #{userId}")
-    String selectUsernameByUserId(@Param("userId") Long userId);
-
     /** 个人信息页：根据id查询账号信息 */
-    @Select("SELECT username, role, status, create_time FROM accounts WHERE user_id = #{userId}")
+    @Select("SELECT user_id, username, role, status, create_time FROM accounts WHERE user_id = #{userId}")
     UserVO selectUserByUserId(@Param("userId") Long userId);
 
     /** 注册：插入新用户，并把自增主键/账号id（id）回填 */

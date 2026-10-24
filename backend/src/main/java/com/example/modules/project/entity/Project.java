@@ -15,11 +15,11 @@ public class Project {
     private Integer status;
     private Long leaderId;
     private Integer progress;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
     private String description;
 
     // 我的项目卡片额外参数
+    private Integer memberCount;
     private String leaderName;
     private Integer myProjectRole;
     private boolean canEdit;

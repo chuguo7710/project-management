@@ -7,17 +7,18 @@ import com.example.common.exception.BusinessException;
 import com.example.modules.project.dto.ProjectCreateDTO;
 import com.example.modules.project.dto.ProjectSearchDTO;
 import com.example.modules.project.mapper.ProjectMapper;
+import com.example.modules.project.mapper.ProjectMemberMapper;
 import com.example.modules.project.service.ProjectService;
 import com.example.modules.project.entity.Project;
 import com.example.common.model.PageResultVO;
-import jakarta.validation.Valid;
+import com.example.modules.project.vo.ProjectMemberVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 @Slf4j
@@ -27,12 +28,18 @@ public class ProjectServiceImpl implements ProjectService {
     @Autowired
     private ProjectMapper projectMapper;
 
+    @Autowired
+    private ProjectMemberMapper projectMemberMapper;
+
     @Override
     public PageResultVO<Project[]> searchListProjects(ProjectSearchDTO projectSearchDTO) {
         // 查询项目列表和总数
         Project[] projects = projectMapper.listProjects(projectSearchDTO);
         Long total = projectMapper.countListProjects(projectSearchDTO);
-        log.info("项目查询完毕，项目查询总数：{}，查询参数：name = {}，leader = {}", total, projectSearchDTO.getProjectName(), projectSearchDTO.getLeaderName());
+        for(Project project : projects) {
+            project.setCanEdit(isCanEdit(project));
+        }
+        log.info("项目查询完毕，项目查询总数：{}，查询参数：projectName = {}，leaderName = {}", total, projectSearchDTO.getProjectName(), projectSearchDTO.getLeaderName());
         return new PageResultVO<>(projects, total);
     }
 
@@ -47,7 +54,7 @@ public class ProjectServiceImpl implements ProjectService {
         for(Project project : projects) {
             project.setCanEdit(isCanEdit(project));
         }
-        log.info("账户相关项目查询完毕，项目查询总数：{}，查询参数：name = {}，leader = {}", total, projectSearchDTO.getProjectName(), projectSearchDTO.getLeaderName());
+        log.info("账户相关项目查询完毕，项目查询总数：{}，查询参数：projectName = {}，leaderName = {}", total, projectSearchDTO.getProjectName(), projectSearchDTO.getLeaderName());
         return new PageResultVO<>(projects, total);
     }
 
@@ -65,7 +72,7 @@ public class ProjectServiceImpl implements ProjectService {
         project.setLeaderId(UserContext.get().getUserId());
         // 添加项目和 “项目——成员” 关联
         int isAddProject = projectMapper.insertProject(project);
-        int isAddProjectUser = projectMapper.insertProjectMember
+        int isAddProjectUser = projectMemberMapper.insertProjectMember
                 (project.getProjectId()
                 , UserContext.get().getUserId()
                 , ProjectRole.OWNER.getCode()
@@ -97,12 +104,76 @@ public class ProjectServiceImpl implements ProjectService {
         }
         // 删除项目和项目所有成员关联
         int isDeleteProject = projectMapper.deleteProjectByProjectId(projectId);
-        projectMapper.deleteProjectMembersByProjectId(projectId);
+        projectMemberMapper.deleteProjectMembersByProjectId(projectId);
         if (isDeleteProject == 0) {
             log.warn("项目删除失败，项目ID：{}", projectId);
             throw new BusinessException("项目删除失败");
         }
         log.info("项目删除成功，项目ID：{}", projectId);
+    }
+
+    @Override
+    public List<ProjectMemberVO> searchProjectMembers(Long projectId) {
+        // 查询项目是否存在
+        Project project = projectMapper.selectProjectByProjectId(projectId);
+        if (project == null) {
+            log.warn("查询项目成员失败，项目ID：{}", projectId);
+            throw new BusinessException("项目不存在");
+        }
+        // 检测身份
+        Long userId = UserContext.get().getUserId();
+        Integer myProjectRole = projectMapper.selectMyProjectRoleByProjectIdAndUserId(projectId, userId);
+        if(UserContext.get().getRole() != Role.ROOT && myProjectRole == null) {
+            log.warn("账户{}无权限查询项目成员，项目ID：{}", userId, projectId);
+            throw new BusinessException("无权限查询项目成员");
+        }
+        return projectMemberMapper.selectMemberByProjectId(projectId);
+    }
+
+    @Override
+    public void addProjectMember(Long projectId, Long userId) {
+        // 检查项目是否存在
+        Project project = projectMapper.selectProjectByProjectId(projectId);
+        if (project == null) {
+            log.warn("添加项目成员失败，项目ID：{}", projectId);
+            throw new BusinessException("项目不存在");
+        }
+        // 检测身份
+        Integer myRole = projectMapper.selectMyProjectRoleByProjectIdAndUserId(UserContext.get().getUserId(), projectId);
+        if (UserContext.get().getRole() != Role.ROOT && (!Objects.equals(myRole, ProjectRole.OWNER.getCode()))) {
+            log.warn("账户无权限添加项目成员，项目ID：{}", projectId);
+            throw new BusinessException("无权限添加项目成员");
+        }
+        // 添加 “项目——成员” 关联
+        int isAddProjectMember = projectMemberMapper.insertProjectMember(projectId, userId
+                , ProjectRole.MEMBER.getCode()
+                , LocalDateTime.now());
+        if (isAddProjectMember == 0) {
+            log.warn("项目成员添加失败，项目ID：{}", projectId);
+        throw new BusinessException("项目成员添加失败");
+        }
+    }
+
+    @Override
+    public void removeProjectMember(Long projectId, Long userId) {
+        // 检查项目是否存在
+        Project project = projectMapper.selectProjectByProjectId(projectId);
+        if (project == null) {
+            log.warn("删除项目成员失败，项目ID：{}", projectId);
+            throw new BusinessException("项目不存在");
+        }
+        // 检测身份
+        Integer myRole = projectMapper.selectMyProjectRoleByProjectIdAndUserId(UserContext.get().getUserId(), projectId);
+        if (UserContext.get().getRole() != Role.ROOT && (!Objects.equals(myRole, ProjectRole.OWNER.getCode()))) {
+            log.warn("账户无权限删除项目成员，项目ID：{}", projectId);
+            throw new BusinessException("无权限删除项目成员");
+        }
+        // 删除 “项目——成员” 关联
+        int isDeleteProjectMember = projectMemberMapper.deleteProjectMemberByProjectIdAndUserId(projectId, userId);
+        if (isDeleteProjectMember == 0) {
+            log.warn("项目成员删除失败，项目ID：{}", projectId);
+            throw new BusinessException("项目成员删除失败");
+        }
     }
 
     private boolean isCanEdit(Project project) {

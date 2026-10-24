@@ -4,6 +4,9 @@ import com.example.modules.project.dto.ProjectCreateDTO;
 import com.example.modules.project.dto.ProjectSearchDTO;
 import com.example.modules.project.entity.Project;
 import com.example.common.model.PageResultVO;
+import com.example.modules.project.vo.ProjectMemberVO;
+
+import java.util.List;
 
 public interface ProjectService {
 
@@ -19,4 +22,12 @@ public interface ProjectService {
     /** 删除项目 */
     void removeProject(Long id);
 
+    /** 查询项目成员 */
+    List<ProjectMemberVO> searchProjectMembers(Long projectId);
+
+    /** 添加项目成员 */
+    void addProjectMember(Long projectId, Long userId);
+
+    /** 删除项目成员 */
+    void removeProjectMember(Long projectId, Long userId);
 }

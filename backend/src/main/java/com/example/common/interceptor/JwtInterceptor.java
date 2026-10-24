@@ -4,11 +4,12 @@ import com.example.common.context.UserContext;
 import com.example.common.enums.Role;
 import com.example.common.model.SessionInfo;
 import com.example.common.utils.JwtTools;
+import com.example.common.utils.Result;
 import com.example.modules.entity.ContextData;
 import com.example.modules.user.mapper.UserMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.security.SignatureException;
+import io.jsonwebtoken.JwtException;
 import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,6 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
+
+import java.io.IOException;
 
 @Slf4j
 @Component
@@ -29,7 +32,15 @@ public class JwtInterceptor implements HandlerInterceptor {
     @Autowired
     private UserMapper userMapper;
 
-    private static final int STATUS_NORMAL = 1;
+    @Autowired
+    private tools.jackson.databind.json.JsonMapper jsonMapper;
+    private void writeJson(HttpServletResponse response, int status, String msg) throws IOException {
+        response.setStatus(status);
+        response.setContentType("application/json; charset=utf-8");
+        response.getWriter().write(jsonMapper.writeValueAsString(Result.error(msg)));
+    }
+
+    private static final int ACCOUNT_STATUS_NORMAL = 1;
 
     // 执行指定路径函数前执行一次
     @Override
@@ -39,7 +50,7 @@ public class JwtInterceptor implements HandlerInterceptor {
         // 获取令牌
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            response.getWriter().write("请先登录");
+            writeJson(response, HttpServletResponse.SC_UNAUTHORIZED, "请先登录");
             log.error("未检测到令牌");
             return false;
         }
@@ -47,28 +58,24 @@ public class JwtInterceptor implements HandlerInterceptor {
 
         // 解析并验证
         try {
-            response.setContentType("application/json; charset=utf-8");
             Claims claims = jwtTools.parseToken(token);
             // 获取账户名称、状态和身份
             Long userId = Long.parseLong(claims.getSubject());
             SessionInfo session = userMapper.selectRoleAndStatusByUserId(userId);
             // 行不存在
             if (session == null) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.getWriter().write("账户不存在或被删除");
+                writeJson(response, HttpServletResponse.SC_UNAUTHORIZED, "账户不存在或被删除");
                 return false;
             }
             // 会话数据不完整
             else if (session.getStatus() == null || session.getRole() == null) {
                 log.error("账户 {} 的会话数据不完整：{}", userId, session);
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.getWriter().write("账户数据异常");
+                writeJson(response, HttpServletResponse.SC_UNAUTHORIZED, "账户数据异常");
                 return false;
             }
             // 账户被禁用
-            else if(session.getStatus() != STATUS_NORMAL) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.getWriter().write("该账户已被禁用");
+            else if(session.getStatus() != ACCOUNT_STATUS_NORMAL) {
+                writeJson(response, HttpServletResponse.SC_UNAUTHORIZED, "该账户已被禁用");
                 return false;
             }
             // 账户正常
@@ -83,11 +90,14 @@ public class JwtInterceptor implements HandlerInterceptor {
                 return true;
             }
         } catch (ExpiredJwtException e) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("令牌过期，请重新登录");
-        } catch (SignatureException e) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("令牌验证失败，请重新登录");
+            log.error("令牌过期", e);
+            writeJson(response, HttpServletResponse.SC_UNAUTHORIZED, "令牌过期，请重新登录");
+        } catch (JwtException e) {
+            log.error("令牌验证失败", e);
+            writeJson(response, HttpServletResponse.SC_UNAUTHORIZED, "令牌验证失败，请重新登录");
+        } catch (IllegalArgumentException e) {
+            log.error("登录凭证无效", e);
+            writeJson(response, HttpServletResponse.SC_UNAUTHORIZED, "登录凭证无效，请重新登录");
         }
         return false;
     }

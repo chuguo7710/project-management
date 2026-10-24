@@ -10,6 +10,7 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -35,7 +36,7 @@ public class GlobalExceptionHandler {
                 .map(ObjectError::getDefaultMessage)
                 .filter(Objects::nonNull)
                 .distinct()
-                .collect(Collectors.joining());
+                .collect(Collectors.joining(";"));
         if (msg.isEmpty()) {
             log.warn("参数验证异常");
         } else {
@@ -48,5 +49,10 @@ public class GlobalExceptionHandler {
     public Result<?> handleNotReadableException(HttpMessageNotReadableException e) {
         log.warn("请求体解析失败：{}", e.getMessage());
         return Result.error("请求参数格式不正确");
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<Result<?>> handleNotFound(NoResourceFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Result.error("接口不存在"));
     }
 }

@@ -16,8 +16,6 @@ const props = defineProps<{
 const emit = defineEmits<{
   delete: [deletedProject: Project]
 }>()
-// 外部依赖
-const userStore = useUserStore()
 // 配置
 const statusClass = (status: number): string => PROJECT_STATUS[status]?.class ?? ''
 const statusText = (status: number): string => PROJECT_STATUS[status]?.text ?? '未知'
