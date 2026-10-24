@@ -8,13 +8,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProjectSearchDTO {
-    private Integer page;
-    private Integer pageSize;
-    private Long userId;
-    private String name;
-    private String leader;
-    private Long offset;
+    // 查询参数基本数据
+    private Integer page = 1;
+    private Integer pageSize = 10;
+    private String projectName;
+    private String leaderName;
     public Long getOffset() {
         return (long) (this.page - 1) * this.pageSize;
     }
+
+    // 我的项目额外参数
+    private Long userId;
 }

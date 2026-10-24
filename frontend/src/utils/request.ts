@@ -4,6 +4,8 @@ import { useUserStore } from '../stores/user'
 import { ElMessage } from 'element-plus'
 import router from '@/router/index'
 
+const SUCCESS_CODE = 1 // 成功状态码
+
 const request: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   timeout: 5000,
@@ -27,9 +29,9 @@ request.interceptors.request.use(
 request.interceptors.response.use(
   (response: AxiosResponse) => {
     // 2xx状态码
-    console.log('200')
-    if (response.data.code === 0) {
+    if (response.data.code !== SUCCESS_CODE) {
       ElMessage.error(response.data.msg)
+      throw new Error()
     }
     return response
   },
@@ -39,8 +41,7 @@ request.interceptors.response.use(
       const status = error.response.status
       switch (status) {
         case 401: // 登录过期
-          console.log('401')
-          ElMessage.error(error.response.data)
+          ElMessage.error(error.response.data?.msg ?? '登录过期，请重新登录')
           const store = useUserStore()
           store.logout()
           router.push({ name: 'login' })

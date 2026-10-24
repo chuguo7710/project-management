@@ -18,8 +18,8 @@ const handleReset = () => {
 <template>
   <div class="project">
     <ActionBar
-      v-model:name="query.name"
-      v-model:leader="query.leader"
+      v-model:name="query.projectName"
+      v-model:leader="query.leaderName"
       @search="load(1)"
       @reset="handleReset"
     >

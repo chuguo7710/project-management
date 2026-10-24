@@ -58,7 +58,7 @@ function focusPassword() {
           v-model="loginFormData.password"
           autocomplete="off"
           placeholder="请输入用户密码"
-          :show-password="true"
+          show-password
           @keyup.enter="handleLogin"
         />
       </el-form-item>

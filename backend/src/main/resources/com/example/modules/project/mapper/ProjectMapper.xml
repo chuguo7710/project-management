@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<!--suppress ALL -->
+<mapper namespace="com.example.modules.project.mapper.ProjectMapper">
+
+    <!-- project + leader名字：WHERE -->
+    <sql id="projectFilter">
+        <if test="projectName != null and projectName != ''">
+            AND p.project_name LIKE CONCAT('%', #{projectName}, '%')
+        </if>
+        <if test="leaderName != null and leaderName != ''">
+            AND a.username LIKE CONCAT('%', #{leaderName}, '%')
+        </if>
+    </sql>
+
+    <!-- project + leader名字：SELECT -->
+    <sql id="projectColumns">
+        p.project_id, p.project_name, p.status, p.leader_id, p.progress,
+        p.create_time, p.description,
+        a.username AS leader_name
+    </sql>
+
+    <!-- project + leader名字：JOIN -->
+    <sql id="projectFrom">
+        FROM projects AS p
+        LEFT JOIN accounts AS a ON p.leader_id = a.user_id
+    </sql>
+
+    <!-- 查询项目列表计数 -->
+    <select id="countListProjects" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        <include refid="projectFrom"/>
+        <where >
+            <include refid="projectFilter"/>
+        </where>
+    </select>
+
+    <!-- 查询项目列表 -->
+    <select id="listProjects" resultType="com.example.modules.project.entity.Project">
+        SELECT <include refid="projectColumns"/>
+        <include refid="projectFrom" />
+        <where>
+            <include refid="projectFilter"/>
+        </where>
+        ORDER BY p.create_time DESC, p.project_id DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <!-- 查询我的项目列表计数 -->
+    <select id="countListMyProjects" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        <include refid="projectFrom"/>
+        <where>
+            EXISTS (SELECT 1
+            FROM project_account as pa
+            WHERE pa.project_id = p.project_id
+            AND pa.user_id = #{userId})
+            <include refid="projectFilter"/>
+        </where>
+    </select>
+
+    <!-- 查询我的项目列表 -->
+    <select id="listMyProjects" resultType="com.example.modules.project.entity.Project">
+        SELECT <include refid="projectColumns"/>, pa.my_project_role
+        FROM projects AS p
+        JOIN project_account AS pa
+        ON pa.user_id = #{userId}
+        AND pa.project_id = p.project_id
+        LEFT JOIN accounts AS a
+        ON a.user_id = p.leader_id
+        <where>
+            <include refid="projectFilter"/>
+        </where>
+        ORDER BY p.create_time DESC, p.project_id DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+</mapper>

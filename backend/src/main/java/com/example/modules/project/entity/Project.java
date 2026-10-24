@@ -1,19 +1,26 @@
 package com.example.modules.project.entity;
 
-import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 public class Project {
-    private Long id;
-    private Long displayedId;
-    private String name;
-    private short status;
-    private String leader;
-    private String progress;
-    private String createTime;
+    // 项目基本数据
+    private Long projectId;
+    private String projectName;
+    private Integer status;
+    private Long leaderId;
+    private Integer progress;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createTime;
     private String description;
+
+    // 我的项目卡片额外参数
+    private String leaderName;
+    private Integer myProjectRole;
+    private boolean canEdit;
 }

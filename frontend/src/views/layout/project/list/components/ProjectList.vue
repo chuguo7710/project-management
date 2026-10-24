@@ -46,8 +46,8 @@ onMounted(() => {
     <el-divider />
     <el-table :data="projectList" border stripe style="width: 100%">
       <el-table-column prop="displayedId" label="ID" width="80" />
-      <el-table-column prop="name" label="项目名称" min-width="150" />
-      <el-table-column prop="leader" label="负责人" width="120" />
+      <el-table-column prop="projectName" label="项目名称" min-width="150" />
+      <el-table-column prop="leaderName" label="负责人" width="120" />
       <el-table-column label="状态" width="100" />
       <el-table-column>
         <template #default="{ row }">

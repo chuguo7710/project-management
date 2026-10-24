@@ -1,5 +1,6 @@
 package com.example.modules.user.service.impl;
 
+import com.example.common.exception.BusinessException;
 import com.example.modules.user.mapper.UserMapper;
 import com.example.modules.user.mapper.UserProfileMapper;
 import com.example.modules.user.service.UserService;
@@ -22,11 +23,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserAllVO fetchUserAllDataByUserId(Long userId) {
+        // 查询账户数据
         UserVO userVO = userMapper.selectUserByUserId(userId);
         if (userVO == null) {
-            throw new RuntimeException("账户不存在");
+            throw new BusinessException("账户不存在");
         }
+        // 查询用户资料数据
         UserProfileVO userProfileVO = userProfileMapper.selectUserProfileByUserId(userId);
         return new UserAllVO(userVO, userProfileVO);
     }
+
 }

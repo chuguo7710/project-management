@@ -7,9 +7,9 @@ spring:
     password: ${PM_DB_PASSWORD} # 密码
     driver-class-name: com.mysql.cj.jdbc.Driver # MyBatis服务
 
-  type: com.alibaba.druid.pool.DruidDataSource  # 默认Hikari,流行Druid
-  druid:
-    log-abandoned: true # Druid日志
+    type: com.alibaba.druid.pool.DruidDataSource  # 默认Hikari,流行Druid
+    druid:
+      log-abandoned: true # Druid日志
 
   servlet:
     multipart:
@@ -20,7 +20,7 @@ server:
       context-path: /api
 mybatis:
   configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 可选,数据库日志
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl # 可选,数据库日志
     map-underscore-to-camel-case: true # 自动根据驼峰命名Mapper文件接收数据库数据
   # 阿里云OSS参数配置
 #aliyun:
@@ -29,4 +29,4 @@ mybatis:
 #    bucketName: rja7710 # Bucket名称
 #    endpoint: https://rja7710.oss-cn-beijing.aliyuncs.com  # Endpoint
 jwt:
-  secret: ${PM_JWT_SECRET}
+  secret: ${PM_JWT_SECRET:dev-only-32-bytes-secret-change-me}

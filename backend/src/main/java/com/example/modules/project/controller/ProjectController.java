@@ -1,10 +1,12 @@
 package com.example.modules.project.controller;
 
 import com.example.common.utils.Result;
+import com.example.modules.project.dto.ProjectCreateDTO;
 import com.example.modules.project.dto.ProjectSearchDTO;
 import com.example.modules.project.service.ProjectService;
 import com.example.modules.project.entity.Project;
 import com.example.common.model.PageResultVO;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -17,34 +19,30 @@ public class ProjectController {
     @Autowired
     private ProjectService projectService;
 
+    /** 查询项目列表 */
     @GetMapping("/list")
-    public Result<PageResultVO<Project[]>> searchProjects(@ModelAttribute ProjectSearchDTO projectSearchDTO) {
-        PageResultVO<Project[]> pageResultVO = projectService.searchProjects(projectSearchDTO);
-        if(pageResultVO.getResult() != null) {
-            return Result.success(pageResultVO);
-        }
-        return Result.error("未查询到数据");
+    public Result<PageResultVO<Project[]>> searchListProjects(@ModelAttribute ProjectSearchDTO projectSearchDTO) {
+            return Result.success(projectService.searchListProjects(projectSearchDTO));
     }
 
-    @GetMapping("/manage")
-    public Result<PageResultVO<Project[]>> getProjects(@ModelAttribute ProjectSearchDTO projectSearchDTO) {
-        PageResultVO<Project[]> pageResultVO = projectService.getProjects(projectSearchDTO);
-
-        if(pageResultVO.getResult() != null) {
-            return Result.success(pageResultVO);
-        }
-        return Result.error("未查询到数据");
+    /** 查询我的项目列表 */
+    @GetMapping("/my")
+    public Result<PageResultVO<Project[]>> searchListMyProjects(@ModelAttribute ProjectSearchDTO projectSearchDTO) {
+        return Result.success(projectService.searchListMyProjects(projectSearchDTO));
     }
 
+    /** 添加项目 */
     @PostMapping
-    public Result<?> addProject(@RequestBody Project project) {
-        projectService.addProject(project);
+    public Result<?> addProject(@Valid @RequestBody ProjectCreateDTO projectCreateDTO) {
+        projectService.addProject(projectCreateDTO);
         return Result.success();
     }
 
+    /** 删除项目 */
     @DeleteMapping("/{id}")
     public Result<?> deleteProject(@PathVariable Long id) {
-        projectService.deleteProject(id);
+        projectService.removeProject(id);
         return Result.success();
     }
+
 }

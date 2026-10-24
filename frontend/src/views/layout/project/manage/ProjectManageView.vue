@@ -14,6 +14,11 @@ const handleReset = () => {
 }
 </script>
 <template>
-  <ActionBar v-model:name="query.name" v-model:leader="query.leader" @search="load(1)" @reset="handleReset" />
+  <ActionBar
+    v-model:name="query.projectName"
+    v-model:leader="query.leaderName"
+    @search="load(1)"
+    @reset="handleReset"
+  />
   <ProjectManage />
 </template>

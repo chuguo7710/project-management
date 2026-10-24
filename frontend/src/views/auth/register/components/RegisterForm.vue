@@ -63,6 +63,7 @@ function focusRePassword() {
           v-model="formLabelAlign.password"
           autocomplete="off"
           placeholder="请再次输入用户密码"
+          show-password
           @keyup.enter="focusRePassword"
         />
       </el-form-item>
@@ -72,6 +73,7 @@ function focusRePassword() {
           v-model="formLabelAlign.rePassword"
           autocomplete="off"
           placeholder="请输入再次用户密码"
+          show-password
           @keyup.enter="handleRegister"
         />
       </el-form-item>

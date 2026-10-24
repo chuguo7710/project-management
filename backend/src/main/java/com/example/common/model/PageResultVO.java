@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PageResultVO<T> {
-    private T result;
+    private T records;
     private Long total = 0L;
 }

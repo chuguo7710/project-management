@@ -48,7 +48,7 @@ const router = createRouter({
               component: () => import('@/views/layout/project/list/ProjectListView.vue'),
             },
             {
-              path: 'manage',
+              path: 'my',
               name: 'projectManage',
               component: () => import('@/views/layout/project/manage/ProjectManageView.vue'),
             },

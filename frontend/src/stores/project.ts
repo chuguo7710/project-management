@@ -1,12 +1,10 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import dayjs from 'dayjs'
 
 import { ElMessage } from 'element-plus'
 
 import { fetchProjectList, fetchMyProjects, createProject } from '@/api/project'
 import { createProjectListSlice } from '@/composables/projectListSlice'
-import { useUserStore } from '@/stores/user'
 
 import type { Project } from '@/types/project'
 import type { ProjectCreatePayload } from '@/types/project'
@@ -26,33 +24,25 @@ export const useProjectStore = defineStore('project', () => {
     projectForm.value = createEmptyProject()
   }
 
-  // api方法
+  /** 创建新项目方法 */
   const createNewProject = async (): Promise<boolean> => {
     if (isCreateProjectLoading.value) return false
     isCreateProjectLoading.value = true
+    const payload: ProjectCreatePayload = {
+      projectName: projectForm.value.projectName,
+      status: projectForm.value.status,
+      progress: projectForm.value.progress,
+      description: projectForm.value.description,
+    }
+
     try {
-      const userStore = useUserStore()
-      const payload: ProjectCreatePayload = {
-        name: projectForm.value.name,
-        status: projectForm.value.status,
-        leader: userStore.userData?.username ?? '',
-        progress: projectForm.value.progress,
-        createTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
-        description: projectForm.value.description,
-      }
       const res = await createProject(payload)
-      if (res.code === 1) {
-        ElMessage.success('创建项目成功')
-        await listSlice.load(1)
-        await manageSlice.load(1)
-        resetForm()
-        return true
-      } else {
-        ElMessage.error(res.msg)
-        return false
-      }
+      ElMessage.success('创建项目成功')
+      await listSlice.load(1)
+      await manageSlice.load(1)
+      resetForm()
+      return true
     } catch {
-      ElMessage.error('创建项目失败')
       return false
     } finally {
       isCreateProjectLoading.value = false

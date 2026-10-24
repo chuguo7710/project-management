@@ -5,6 +5,6 @@ export interface ApiResult<T = null> {
 }
 
 export interface PageResult<T> {
-  result: T
+  records: T
   total: number
 }

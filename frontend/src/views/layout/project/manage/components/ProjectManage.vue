@@ -20,7 +20,7 @@ const projectList = computed(() => pageState.list)
 // 事件处理
 const askDelete = async (deletedProject: Project) => {
   try {
-    await ElMessageBox.confirm(`确认删除项目 「${deletedProject.name}」 吗？`, '确认删除', {
+    await ElMessageBox.confirm(`确认删除项目 「${deletedProject.projectName}」 吗？`, '确认删除', {
       confirmButtonText: '确认',
       cancelButtonText: '取消',
       type: 'warning',
@@ -28,7 +28,7 @@ const askDelete = async (deletedProject: Project) => {
   } catch {
     return
   }
-  await removeProject(deletedProject.id)
+  await removeProject(deletedProject.projectId)
 }
 // 派生
 const hasProject = computed(() => projectList.value.length > 0)

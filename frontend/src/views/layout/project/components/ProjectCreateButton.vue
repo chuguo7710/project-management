@@ -48,7 +48,11 @@ const isCreateProjectDialogVisible = ref<boolean>(false)
   <el-dialog v-model="isCreateProjectDialogVisible" title="项目创建信息" width="500">
     <el-form label-position="right" label-width="auto" :model="projectForm">
       <el-form-item label="项目名称">
-        <el-input v-model="projectForm.name" autocomplete="off" placeholder="请输入项目名称" />
+        <el-input
+          v-model="projectForm.projectName"
+          autocomplete="off"
+          placeholder="请输入项目名称"
+        />
       </el-form-item>
       <el-form-item label="项目状态">
         <el-radio-group v-model="projectForm.status">

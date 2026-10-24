@@ -1,32 +1,36 @@
 // 项目对象
 export interface Project {
-  id: number
-  displayedId: number
-  name: string
+  projectId: number
+  projectName: string
   status: number
-  leader: string
+  leaderId: number
   progress: number
-  createTime: string
+  createTime?: string
   description: string
+
+  displayedId: number
+  leaderName: string
+  canEdit: boolean
   memberCount?: number
 }
 export const createEmptyProject = (): Project => ({
-  id: 0,
-  displayedId: 0,
-  name: '',
+  projectId: 0,
+  projectName: '',
   status: 1,
-  leader: '',
+  leaderId: 0,
   progress: 0,
-  createTime: '',
   description: '',
+
+  displayedId: 0,
+  leaderName: '',
+  canEdit: false,
 })
-// 新建项目
+
+// 新建项目表单
 export interface ProjectCreatePayload {
-  name: string
+  projectName: string
   status: number
-  leader: string
   progress: number
-  createTime: string
   description: string
 }
 
@@ -37,18 +41,18 @@ export interface PageState {
   total: number
 }
 export interface SearchQuery {
-  name?: string
-  leader?: string
+  projectName?: string
+  leaderName?: string
 }
 export interface ProjectListQuery {
   page: number
   pageSize: number
-  name?: string
-  leader?: string
+  projectName?: string
+  leaderName?: string
 }
 export interface ProjectCard {
   project: Project
-  role: number
+  myProjectRole: number
   joinTime: string
 }
 

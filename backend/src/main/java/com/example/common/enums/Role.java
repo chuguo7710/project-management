@@ -8,9 +8,9 @@ import java.util.stream.Collectors;
 
 @Getter
 public enum Role {
-    ROOT(1, "root"), // Changed from (short) 1 to 1
-    ADMIN(2, "admin"), // Changed from (short) 2 to 2
-    USER(3, "user"); // Changed from (short) 3 to 3
+    ROOT(1, "root"),
+    ADMIN(2, "admin"),
+    USER(3, "user");
 
     private final Integer code;
     private final String desc;

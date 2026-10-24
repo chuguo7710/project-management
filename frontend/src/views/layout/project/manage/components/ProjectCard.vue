@@ -22,7 +22,7 @@ const userStore = useUserStore()
 const statusClass = (status: number): string => PROJECT_STATUS[status]?.class ?? ''
 const statusText = (status: number): string => PROJECT_STATUS[status]?.text ?? '未知'
 // 内部数据
-const canEdit = computed(() => props.currentProject.leader === userStore.userData?.username)
+const canEdit = computed(() => props.currentProject.canEdit)
 const canManage = canEdit
 const canDelete = canEdit
 // 派生
@@ -38,7 +38,7 @@ const handleBoard = () => {}
     <div class="main">
       <!-- 标题行：图标 + 名称 + 状态 -->
       <div class="title">
-        <span class="project-name">{{ currentProject.name }}</span>
+        <span class="project-name">{{ currentProject.projectName }}</span>
         <span>
           <span :class="statusClass(currentProject.status)"></span>
           {{ statusText(currentProject.status) }}
@@ -51,7 +51,7 @@ const handleBoard = () => {}
         <!-- 负责人 -->
         <div class="info-item">
           <span class="label">负责人：</span>
-          <span class="leader">{{ currentProject.leader }}</span>
+          <span class="leader">{{ currentProject.leaderName }}</span>
         </div>
         <!-- 成员数、进度 -->
         <div class="info-item">

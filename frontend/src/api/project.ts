@@ -13,7 +13,7 @@ export const fetchProjectList = async (query: ProjectListQuery) => {
 
 /** 我的项目 */
 export const fetchMyProjects = async (query: ProjectListQuery) => {
-  const res = await request.get<ApiResult<PageResult<Project[]>>>('/project/manage', {
+  const res = await request.get<ApiResult<PageResult<Project[]>>>('/project/my', {
     params: query,
   })
   return res.data
