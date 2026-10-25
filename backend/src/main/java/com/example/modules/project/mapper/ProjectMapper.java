@@ -19,13 +19,13 @@ public interface ProjectMapper {
     Long countListProjects(ProjectSearchDTO projectSearchDTO);
 
     /** 查询项目列表 */
-    Project[] listProjects(ProjectSearchDTO projectSearchDTO);
+    Project[] selectListProjects(ProjectSearchDTO projectSearchDTO);
 
     /** 查询我的项目列表计数 */
     Long countListMyProjects(ProjectSearchDTO projectSearchDTO);
 
     /** 查询我的项目列表 */
-    Project[] listMyProjects(ProjectSearchDTO projectSearchDTO);
+    Project[] selectListMyProjects(ProjectSearchDTO projectSearchDTO);
 
     /** 添加项目，回填 project_id */
     @Options(useGeneratedKeys = true, keyProperty = "projectId")

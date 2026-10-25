@@ -28,4 +28,4 @@ mybatis:
 #    bucketName: rja7710 # Bucket名称
 #    endpoint: https://rja7710.oss-cn-beijing.aliyuncs.com  # Endpoint
 jwt:
-  secret: ${PM_JWT_SECRET:dev-only-32-bytes-secret-change-me}
+  secret: ${PM_JWT_SECRET}

@@ -41,7 +41,7 @@
     </select>
 
     <!-- 查询项目列表 -->
-    <select id="listProjects" resultType="com.example.modules.project.entity.Project">
+    <select id="selectListProjects" resultType="com.example.modules.project.entity.Project">
         SELECT <include refid="projectColumns"/>
         <include refid="projectFrom" />
         <where>
@@ -65,12 +65,12 @@
     </select>
 
     <!-- 查询我的项目列表 -->
-    <select id="listMyProjects" resultType="com.example.modules.project.entity.Project">
+    <select id="selectListMyProjects" resultType="com.example.modules.project.entity.Project">
         SELECT <include refid="projectColumns"/>, pa.my_project_role
         FROM projects AS p
         JOIN project_account AS pa
-        ON pa.user_id = #{userId}
-        AND pa.project_id = p.project_id
+        ON pa.project_id = p.project_id
+        AND pa.user_id = #{userId}
         LEFT JOIN accounts AS a
         ON a.user_id = p.leader_id
         <where>

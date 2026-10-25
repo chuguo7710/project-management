@@ -1,7 +1,12 @@
 import request from '@/utils/request'
 
 import type { ApiResult, PageResult } from '@/types/common'
-import type { Project, ProjectListQuery, ProjectCreatePayload } from '@/types/project'
+import type {
+  Project,
+  ProjectListQuery,
+  ProjectCreatePayload,
+  ProjectMember,
+} from '@/types/project'
 
 /** 项目列表 */
 export const fetchProjectList = async (query: ProjectListQuery) => {
@@ -28,5 +33,23 @@ export const createProject = async (payload: ProjectCreatePayload) => {
 /** 删除项目 */
 export const deleteProject = async (id: number) => {
   const res = await request.delete<ApiResult>(`/project/${id}`)
+  return res.data
+}
+
+/** 查询项目成员 */
+export const fetchProjectMembers = async (projectId: number) => {
+  const res = await request.get<ApiResult<ProjectMember[]>>(`/project/${projectId}/members`)
+  return res.data
+}
+
+/** 添加项目成员 */
+export const insertProjectMember = async (projectId: number, userId: number) => {
+  const res = await request.post<ApiResult>(`/project/${projectId}/members`, userId)
+  return res.data
+}
+
+/** 移除项目成员 */
+export const deleteProjectMember = async (projectId: number, userId: number) => {
+  const res = await request.delete<ApiResult>(`/project/${projectId}/members/${userId}`)
   return res.data
 }

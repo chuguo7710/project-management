@@ -14,7 +14,7 @@ public interface UserMapper {
     String selectPasswordByUsername(@Param("username") String username);
 
     /** 登录成功后签发token用：id + role */
-    @Select("SELECT user_id, role FROM accounts WHERE username = #{username}")
+    @Select("SELECT user_id, status, role FROM accounts WHERE username = #{username}")
     UserAuthInfoVO selectAuthInfoByUsername(@Param("username") String username);
 
     /** 拦截器：账号角色和状态，状态 -> 1 正常，0 禁用*/

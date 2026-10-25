@@ -12,16 +12,16 @@ export interface RegisterFormData {
 
 export interface UserData {
   username: string
-  avatar: string
+  avatar: string | null
   role: number
   createTime: string
 }
 
 export interface UserProfileData {
   nickname: string
-  avatar: string
+  avatar: string | null
   gender: number
-  bio: string
+  bio: string | null
   updateTime: string
 }
 

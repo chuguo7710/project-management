@@ -23,6 +23,8 @@ import java.util.Objects;
 @RequestMapping("/auth")
 public class AuthServiceImpl implements AuthService {
 
+    private static final int STATUS_NORMAL = 1;
+
     @Autowired
     private JwtTools jwtTools;
 
@@ -51,8 +53,12 @@ public class AuthServiceImpl implements AuthService {
             throw new BusinessException("密码错误");
         }
         log.info("账户\"{}\"登录成功", username);
-        // 判断role是否正常并创建token
+        // 判断账户是否正常并创建token
         UserAuthInfoVO authInfo = userMapper.selectAuthInfoByUsername(username);
+        if(authInfo.getStatus() != STATUS_NORMAL) {
+            log.info("账户\"{}\"因被禁用登录失败", username);
+            throw new BusinessException("账户被禁用");
+        }
         Role role = Role.toRole(authInfo.getRole());
         if (role == null) {
             log.error("账户\"{}\"的角色值 {} 无法识别", username, authInfo.getRole());
@@ -69,6 +75,11 @@ public class AuthServiceImpl implements AuthService {
         if(!Objects.equals(registerDTO.getPassword(), registerDTO.getRePassword())) {
             log.info("账户\"{}\"因密码不一致注册失败", registerDTO.getUsername());
             throw new BusinessException("两次输入的密码不一致");
+        }
+        // 判断账户是否已经存在
+        if (userMapper.selectPasswordByUsername(registerDTO.getUsername()) != null) {
+            log.info("账户\"{}\"因账户已存在注册失败", registerDTO.getUsername());
+            throw new BusinessException("账户已存在");
         }
         // 加密上传
         registerDTO.setPassword(passwordEncoder.encode(registerDTO.getPassword()));

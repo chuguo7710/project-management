@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 
 @Data
 public class ProjectMemberVO {
+    private Long userId;
     private String username;
     private String avatar;
     private Integer myProjectRole;

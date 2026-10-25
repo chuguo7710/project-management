@@ -1,8 +1,9 @@
 <script lang="ts" setup>
 import ProjectCard from './ProjectCard.vue'
 import PageBar from '../../components/PageBar.vue'
+import MemberManageDrawer from './member/MemberManageDrawer.vue'
 
-import { onMounted, computed } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 
 import { ElMessageBox } from 'element-plus'
 
@@ -17,6 +18,8 @@ const projectStore = useProjectStore()
 const { manageSlice } = projectStore
 const { pageState, load } = manageSlice
 const projectList = computed(() => pageState.list)
+// 内部数据
+const memberManageRef = ref<InstanceType<typeof MemberManageDrawer> | null>(null)
 // 事件处理
 const askDelete = async (deletedProject: Project) => {
   try {
@@ -29,6 +32,9 @@ const askDelete = async (deletedProject: Project) => {
     return
   }
   await removeProject(deletedProject.projectId)
+}
+const handleMembers = (project: Project) => {
+  memberManageRef.value?.open(project)
 }
 // 派生
 const hasProject = computed(() => projectList.value.length > 0)
@@ -43,22 +49,27 @@ onMounted(() => {
 })
 </script>
 <template>
-  <!-- 项目卡片列表 -->
-  <ProjectCard
-    v-for="project in projectList"
-    :key="project.displayedId"
-    :currentProject="project"
-    @delete="askDelete"
-  />
-  <!-- 分页栏 -->
-  <PageBar
-    v-show="hasProject"
-    v-model:page="pageState.page"
-    v-model:pageSize="pageState.pageSize"
-    :total="pageState.total"
-    :pageSizes="[5, 10, 20, 30]"
-    @change="load()"
-  />
+  <div class="project-manage">
+    <!-- 项目卡片列表 -->
+    <ProjectCard
+      v-for="project in projectList"
+      :key="project.displayedId"
+      :currentProject="project"
+      @delete="askDelete"
+      @members="handleMembers"
+    />
+    <!-- 分页栏 -->
+    <PageBar
+      v-show="hasProject"
+      v-model:page="pageState.page"
+      v-model:pageSize="pageState.pageSize"
+      :total="pageState.total"
+      :pageSizes="[5, 10, 20, 30]"
+      @change="load()"
+    />
+    <!-- 成员管理抽屉 -->
+    <MemberManageDrawer ref="memberManageRef" />
+  </div>
 </template>
 <style scoped>
 .pagination {

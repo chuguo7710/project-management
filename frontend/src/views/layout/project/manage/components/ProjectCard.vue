@@ -4,7 +4,6 @@ import { computed } from 'vue'
 
 import { PROJECT_STATUS } from '@/types/project'
 import type { Project } from '@/types/project'
-import { useUserStore } from '@/stores/user'
 
 import '@/assets/styles/status.scss'
 
@@ -15,6 +14,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   delete: [deletedProject: Project]
+  members: [project: Project]
 }>()
 // 配置
 const statusClass = (status: number): string => PROJECT_STATUS[status]?.class ?? ''
@@ -28,7 +28,9 @@ const formatDate = (datetime?: string): string =>
   datetime ? dayjs(datetime).format('YYYY-MM-DD') : '-'
 
 const handleEdit = () => {}
-const handleMembers = () => {}
+const handleMembers = () => {
+  emit('members', props.currentProject)
+}
 const handleBoard = () => {}
 </script>
 <template>

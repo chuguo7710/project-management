@@ -28,6 +28,7 @@ export const useProjectStore = defineStore('project', () => {
   const createNewProject = async (): Promise<boolean> => {
     if (isCreateProjectLoading.value) return false
     isCreateProjectLoading.value = true
+
     const payload: ProjectCreatePayload = {
       projectName: projectForm.value.projectName,
       status: projectForm.value.status,
