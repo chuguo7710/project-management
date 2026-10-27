@@ -9,8 +9,11 @@ import { createProjectListSlice } from '@/composables/projectListSlice'
 import type { Project } from '@/types/project'
 import type { ProjectCreatePayload } from '@/types/project'
 import { createEmptyProject } from '@/types/project'
+import { useRequest } from '@/composables/useRequest'
 
 export const useProjectStore = defineStore('project', () => {
+  // 外部依赖
+  const createProjectDedupe = useRequest(createProject, { mode: 'dedupe' }) // 创建方法在store
   // 创建项目
   const isCreateProjectLoading = ref<boolean>(false)
   const projectForm = ref<Project>(createEmptyProject())
@@ -26,7 +29,6 @@ export const useProjectStore = defineStore('project', () => {
 
   /** 创建新项目方法 */
   const createNewProject = async (): Promise<boolean> => {
-    if (isCreateProjectLoading.value) return false
     isCreateProjectLoading.value = true
 
     const payload: ProjectCreatePayload = {
@@ -37,7 +39,8 @@ export const useProjectStore = defineStore('project', () => {
     }
 
     try {
-      const res = await createProject(payload)
+      const res = await createProjectDedupe.run(payload)
+      if (res === undefined) return false
       ElMessage.success('创建项目成功')
       await listSlice.load(1)
       await manageSlice.load(1)
@@ -46,7 +49,7 @@ export const useProjectStore = defineStore('project', () => {
     } catch {
       return false
     } finally {
-      isCreateProjectLoading.value = false
+      if (!createProjectDedupe.isLoading.value) isCreateProjectLoading.value = false
     }
   }
 

@@ -36,6 +36,10 @@ request.interceptors.response.use(
     return response
   },
   (error) => {
+    // 主动取消请求（abort）
+    if (axios.isCancel(error) || error.code === 'ERR_CANCELED') {
+      return Promise.reject(error)
+    }
     // 非2xx状态码
     if (error.response) {
       const status = error.response.status

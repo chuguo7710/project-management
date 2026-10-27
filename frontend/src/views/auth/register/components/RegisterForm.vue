@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import router from '@/router'
 
 import { ElInput, ElButton } from 'element-plus'
@@ -8,9 +8,7 @@ import type { RegisterFormData } from '@/types/user'
 import { useRegister } from '../composables/useRegister'
 
 // 外部依赖
-const { register } = useRegister()
-// 内部状态
-const isRegisterLoading = ref(false)
+const { register, isRegisterLoading } = useRegister()
 // 内部数据
 const formLabelAlign = reactive<RegisterFormData>({
   username: '',
@@ -22,12 +20,10 @@ const clickLogin = () => {
   router.push({ name: 'login' })
 }
 const handleRegister = async () => {
-  isRegisterLoading.value = true
   const res = await register(formLabelAlign)
   if (res) {
     await router.push({ name: 'login' })
   }
-  isRegisterLoading.value = false
 }
 // 派生
 const passwordInputRef = ref<InstanceType<typeof ElInput> | null>(null)

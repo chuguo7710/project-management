@@ -1,0 +1,42 @@
+基本流程：
+
+<!--- 路由 --->
+preRouter
+|
+|   ---router守卫：检验token
+|
+V
+nextRouter
+
+<!--- 请求 --->
+request（axios）     |->状态码正常（200）：code为1则通过，code不为1则打印后端传的msg并传递异常
+|                    |
+|   ---request拦截器：|->主动取消（abort）：返回Promise.rejected(error)
+|                    |
+V                    |->状态码不正常：根据状态码打印异常并Promise.rejected(error)
+api方法
+|
+|   ---通过api函数约束返回类型来检验res值，返回res
+|
+V
+useRequest
+|
+|   ---根据latest、dedupe、queue、coalesce处理发送request请求：操作合理的请求返回res结果，否则返回undefined
+|
+V
+composables
+|
+|   ---检验res是否更新，有则返回true，无则返回false
+|
+V
+vue.data渲染
+
+
+
+
+
+
+
+
+
+

@@ -4,12 +4,13 @@ import { ElMessage } from 'element-plus'
 
 import { deleteProject } from '@/api/project'
 import { useProjectStore } from '@/stores/project'
+import { useRequest } from '@/composables/useRequest'
 
 export const useProjectDelete = () => {
   // 外部依赖
   const projectStore = useProjectStore()
   const { listSlice, manageSlice } = projectStore
-
+  const deleteProjectDedupe = useRequest(deleteProject, { mode: 'dedupe' }) // 创建方法在store
   // 内部状态
   const isDeleteProjectLoading = ref<boolean>(false)
 
@@ -19,7 +20,8 @@ export const useProjectDelete = () => {
     isDeleteProjectLoading.value = true
 
     try {
-      const res = await deleteProject(id)
+      const res = await deleteProjectDedupe.run(id)
+      if (res === undefined) return false
       ElMessage.success('成功删除项目')
       listSlice.load(1)
       manageSlice.load(1)
@@ -27,7 +29,7 @@ export const useProjectDelete = () => {
     } catch {
       return false
     } finally {
-      isDeleteProjectLoading.value = false
+      if (!deleteProjectDedupe.isLoading.value) isDeleteProjectLoading.value = false
     }
   }
 

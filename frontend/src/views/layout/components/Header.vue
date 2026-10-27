@@ -1,14 +1,17 @@
 <script lang="ts" setup>
+import logoUrl from '@/assets/img/logo-128.png'
+
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/stores/user'
 import { useHeader } from '../composables/useHeader'
+
 const store = useUserStore()
 const { userProfileData } = storeToRefs(store)
 const { handleCommand } = useHeader()
 </script>
 <template>
   <div class="header">
-    <div class="logo"></div>
+    <div class="logo"><img :src="logoUrl" alt="Logo" /></div>
     <!-- 用户基本信息 -->
     <div class="userDisplay">
       <el-dropdown class="dropdown" placement="bottom" trigger="click" @command="handleCommand">
@@ -31,18 +34,12 @@ const { handleCommand } = useHeader()
     </div>
   </div>
 </template>
-<style scoped>
+<style scoped lang="scss">
 .icon {
   size: default;
   color: #74aaf5;
 }
-.nicknameSlot {
-  padding: 0 10px;
-}
-.link {
-  display: flex;
-  align-items: center;
-}
+
 .header {
   background-color: #98b7ff;
   width: 100%;
@@ -50,8 +47,21 @@ const { handleCommand } = useHeader()
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-.dropdown {
-  margin-right: 20px;
+  .logo {
+    opacity: 0.5;
+    .img {
+      position: absolute;
+    }
+  }
+  .dropdown {
+    margin-right: 20px;
+    .link {
+      display: flex;
+      align-items: center;
+      .nicknameSlot {
+        padding: 0 10px;
+      }
+    }
+  }
 }
 </style>
