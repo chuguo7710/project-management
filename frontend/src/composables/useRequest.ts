@@ -132,7 +132,6 @@ export function useRequest<A extends unknown[], R>(
               }
             } catch {
               runningWaiter?.(undefined)
-              throw new Error()
             }
           }, wait)
         })

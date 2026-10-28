@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import ActionBar from '../components/ActionBar.vue'
-import ProjectCreatedButton from '../components/ProjectCreateButton.vue'
+import ProjectCreatedButton from './components/ProjectCreateButton.vue'
 import ProjectList from './components/ProjectList.vue'
 
 import { useProjectStore } from '@/stores/project'
@@ -18,8 +18,8 @@ const handleReset = () => {
 <template>
   <div class="project">
     <ActionBar
-      v-model:name="query.projectName"
-      v-model:leader="query.leaderName"
+      v-model:projectName="query.projectName"
+      v-model:leaderName="query.leaderName"
       @search="load(1)"
       @reset="handleReset"
     >

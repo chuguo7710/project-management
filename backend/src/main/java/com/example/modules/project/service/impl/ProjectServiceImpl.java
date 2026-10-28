@@ -4,6 +4,7 @@ import com.example.common.context.UserContext;
 import com.example.common.enums.ProjectRole;
 import com.example.common.enums.Role;
 import com.example.common.exception.BusinessException;
+import com.example.modules.project.dto.EditProjectDTO;
 import com.example.modules.project.dto.ProjectCreateDTO;
 import com.example.modules.project.dto.ProjectSearchDTO;
 import com.example.modules.project.mapper.ProjectMapper;
@@ -126,6 +127,28 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    public void changeProject(Long projectId, EditProjectDTO editProjectDTO) {
+        // 检测身份
+        Long userId = UserContext.get().getUserId();
+        Integer myProjectRole = projectMapper.selectMyProjectRoleByProjectIdAndUserId(editProjectDTO.getProjectId(), userId);
+        if (UserContext.get().getRole() != Role.ROOT && (!Objects.equals(myProjectRole, ProjectRole.OWNER.getCode()))) {
+            log.warn("账户无权限修改项目，项目ID：{}", projectId);
+            throw new BusinessException("无权限修改项目");
+        }
+        // 查询项目是否存在
+        if (isProjectNotExist(projectId)) {
+            log.warn("项目修改失败，项目ID：{}", projectId);
+            throw new BusinessException("项目不存在");
+        }
+        // 修改项目信息
+        int isChangeProject = projectMapper.updateProject(projectId, editProjectDTO);
+        if (isChangeProject == 0) {
+            log.warn("项目修改失败，项目ID：{}", projectId);
+            throw new BusinessException("项目修改失败");
+        }
+        log.info("项目修改完成，项目ID：{}", projectId);
+    }
+    @Override
     public List<ProjectMemberVO> searchProjectMembers(Long projectId) {
         // 检测身份
         Long userId = UserContext.get().getUserId();
@@ -206,6 +229,8 @@ public class ProjectServiceImpl implements ProjectService {
             throw new BusinessException("项目成员删除失败");
         }
     }
+
+
 
     private boolean isCanEdit(Project project, Long myUserId) {
         // 基本数据

@@ -14,8 +14,6 @@ const props = withDefaults(
 )
 
 const emit = defineEmits<{
-  'update:page': [value: number]
-  'update:pageSize': [value: number]
   change: []
 }>()
 

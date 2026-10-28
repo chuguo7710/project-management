@@ -1,12 +1,21 @@
 <script lang="ts" setup>
+import { ref } from 'vue'
+
 import { CloseBold } from '@element-plus/icons-vue'
+import { ElInput } from 'element-plus'
 // props
-const name = defineModel<string>('name', { default: '' })
-const leader = defineModel<string>('leader', { default: '' })
+const projectName = defineModel<string>('projectName', { default: '' })
+const leaderName = defineModel<string>('leaderName', { default: '' })
 const emit = defineEmits<{
   search: []
   reset: []
 }>()
+// 内部状态
+const leaderInput = ref<InstanceType<typeof ElInput> | null>(null)
+// 事件处理
+function leaderInputFocus() {
+  leaderInput.value?.focus()
+}
 </script>
 <template>
   <div class="action-bar">
@@ -15,14 +24,28 @@ const emit = defineEmits<{
       <!-- 查询参数1: 项目名称 -->
       <el-input
         class="responsive-input"
-        v-model="name"
+        v-model="projectName"
         clearable
         :clear-icon="CloseBold"
         placeholder="请输入项目名称"
-        @keyup.enter="emit('search')"
+        @keyup.enter="leaderInputFocus"
       >
         <template #prefix>
           <el-icon class="el-input-icon"><search /></el-icon>
+        </template>
+      </el-input>
+      <!-- 查询参数2: 项目负责人 -->
+      <el-input
+        class="responsive-input"
+        ref="leaderInput"
+        v-model="leaderName"
+        clearable
+        :clear-icon="CloseBold"
+        placeholder="请输入项目负责人"
+        @keyup.enter="emit('search')"
+      >
+        <template #prefix>
+          <el-icon class="el-input-icon"><user /></el-icon>
         </template>
       </el-input>
       <!-- 按钮1:查询项目 -->

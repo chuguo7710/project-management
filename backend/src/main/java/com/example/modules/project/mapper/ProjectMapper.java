@@ -1,5 +1,6 @@
 package com.example.modules.project.mapper;
 
+import com.example.modules.project.dto.EditProjectDTO;
 import com.example.modules.project.dto.ProjectSearchDTO;
 import com.example.modules.project.entity.Project;
 import org.apache.ibatis.annotations.*;
@@ -9,7 +10,7 @@ public interface ProjectMapper {
 
     /** 查询项目详情 */
     @Select("SELECT project_id, project_name, status, leader_id, progress, create_time, description FROM projects WHERE project_id = #{projectId}")
-    Project selectProjectByProjectId(Long projectId);
+    Project selectProjectByProjectId(@Param("projectId") Long projectId);
 
     /** 查询我的项目角色 */
     @Select("SELECT my_project_role FROM project_account WHERE project_id = #{projectId} AND user_id = #{userId}")
@@ -34,6 +35,9 @@ public interface ProjectMapper {
 
     /** 删除项目 */
     @Delete("DELETE FROM projects WHERE project_id = #{projectId}")
-    int deleteProjectByProjectId(Long projectId);
+    int deleteProjectByProjectId(@Param("projectId") Long projectId);
 
+    /** 更新项目 */
+    @Update("UPDATE projects SET project_name = #{projectName}, status = #{status}, description = #{description} WHERE project_id = #{projectId}")
+    int updateProject(@Param("projectId") Long projectId, EditProjectDTO editProjectDTO);
 }

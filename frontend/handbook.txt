@@ -16,26 +16,89 @@ request（axios）     |->状态码正常（200）：code为1则通过，code不
 V                    |->状态码不正常：根据状态码打印异常并Promise.rejected(error)
 api方法
 |
-|   ---通过api函数约束返回类型来检验res值，返回res
+|   --- 返回 res.data（ApiResult）；第一参数 signal（进 useRequest 时必备）
 |
 V
 useRequest
 |
-|   ---根据latest、dedupe、queue、coalesce处理发送request请求：操作合理的请求返回res结果，否则返回undefined
+|   ---根据四模式调度，操作合理的请求返回res结果，不合理的则返回 undefined
 |
 V
 composables
 |
-|   ---检验res是否更新，有则返回true，无则返回false
+|   ---通过判undefined检验res是否更新，有则打印成功信息并返回true，无则返回return false
 |
 V
-vue.data渲染
+vue.data渲染（true则更新数据，false则return）
 
 
 
 
+<!--- 基本模板 --->
+/** 1.动态子件开关：打开 + 根据父件传参调用子件api业务（比如member-drawer需要父件传project参数进行search） */
+// 父件
+ref绑定 + 函数调用open
+// 子件
+const open = async (project: Project) => {
+  visible.value = true                  //打开
+  currentProject.value = project        //按需记录，用于执行子件里的其他业务（比如删除项目-成员关联）
+  const isSearched = await searchProjectMembers(project.projectId)  //根据父件传参调用子件api业务
+  if(!isSearched)...     //与composables模板一致
+}
+defineExpose({
+  open,
+})
+
+/** 2.静态子件开关：打开（比如add-project-form） */
+// 父件（不推荐：纯开关没有 await/参数时，状态交给父件的 v-model）
+Ref通过ref绑定 + 函数调用open
+// 子件（决定是否展示）
+const open = () => {
+  visible.value = true
+}
+defineExpose({ open })
+------或------
+// 父件（决定是否展示）（推荐）
+isVisible通过"v-model:"prop绑定 + 函数改变isVisible
+// 子件（通过emit改变isVisible）
+const visible = defineModel<boolean>('visible', { default: false }) + v-model绑定
+------附------
+如果子件每次打开是全新的（非store），父件可以用v-if
 
 
+/** 3.静态子件可变静态参数：每个子件实例固定但相互间可以不一样（比如page-bar的pageSizes） */
+// 父件
+通过":"prop传定值
+// 子件
+const props = withDefaults(
+  defineProps<{
+    pageSizes: number[]
+  }>(),
+  {
+    pageSizes: () => [5, 10, 20, 50],
+  },
+)
+
+/** 3.静态子件动态参数：每次子件渲染会更新（比如page-bar的total和pageSize） */
+// 父件
+通过"v-model:"prop绑定
+// 子件
+const pageSize = defineModel<number>('pageSize', { default: 5 }) + v-model绑定
+
+
+<!--- api.url --->
+post:/project/{projectId}/members (userId)添加项目成员
+put:/project/{projectId} (payload)项目编辑
+
+<!--- 命名规则 --->
+多子组件共用的一个状态的动态参数（存到父组件）：current...
+组件变量绑定：Ref
+父件绑定子件视图：父件is...Visible，子件visible
+
+api：insert/delete/update/select...
+useRequest：...Latest/Dedupe/Queue/Coalesce
+composables：add/remove/change/search...
+vue：handleAdd/Remove/Change/Search/...
 
 
 

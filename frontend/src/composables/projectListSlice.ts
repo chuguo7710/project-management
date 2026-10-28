@@ -1,14 +1,18 @@
 import { ref } from 'vue'
 import type { ApiResult, PageResult } from '@/types/common'
 import type { Project, SearchQuery, ProjectListQuery } from '@/types/project'
+import { useRequest } from '@/composables/useRequest'
 
-type FetchProjectPage = (q: ProjectListQuery) => Promise<ApiResult<PageResult<Project[]>>>
-type LoadTarget = { page: number; pageSize: number; query: SearchQuery }
+type FetchProjectPage = (
+  signal: AbortSignal,
+  query: ProjectListQuery,
+) => Promise<ApiResult<PageResult<Project[]>>>
 
 export const createProjectListSlice = (fetchPage: FetchProjectPage) => {
+  // 外部依赖
+  const fetchProjectLatest = useRequest(fetchPage, { mode: 'latest' })
   // 内部状态
   const isLoading = ref<boolean>(false)
-
   // 内部数据
   const pageState = ref<{
     page: number
@@ -24,53 +28,33 @@ export const createProjectListSlice = (fetchPage: FetchProjectPage) => {
     loaded: false,
   })
   const query = ref<SearchQuery>({ projectName: '', leaderName: '' })
-  let pending: LoadTarget | null = null
 
   /** 加载项目列表方法 */
-  const load = async (page?: number) => {
+  const load = async (page?: number): Promise<boolean> => {
     // 更新页数
     if (page !== undefined) pageState.value.page = page
-    // 记录最新的请求参数
-    pending = {
-      page: pageState.value.page,
-      pageSize: pageState.value.pageSize,
-      query: { ...query.value },
-    }
-
-    if (isLoading.value) return
     isLoading.value = true
 
     try {
-      while (pending) {
-        // 读最新的请求并清空记录
-        const target = pending
-        pending = null
-
-        try {
-          const res = await fetchPage({
-            ...target.query,
-            page: target.page,
-            pageSize: target.pageSize,
-          })
-          // 请求成功后是否还有请求被记录
-          if (pending) continue
-          // 赋值、渲染
-          pageState.value.list = res.data.records.map((project, index) => ({
-            ...project,
-            displayedId: (target.page - 1) * target.pageSize + index + 1,
-          }))
-          pageState.value.total = res.data.total
-          pageState.value.loaded = true
-        } catch {
-          // 请求失败后是否还有请求被记录
-          if (pending) continue
-          console.error('加载项目列表失败')
-          pageState.value.list = []
-          pageState.value.total = 0
-        }
-      }
+      const res = await fetchProjectLatest.run({
+        ...query.value,
+        page: pageState.value.page,
+        pageSize: pageState.value.pageSize,
+      })
+      if (res === undefined) return false
+      pageState.value.list = res.data.records.map((project, index) => ({
+        ...project,
+        displayedId: (pageState.value.page - 1) * pageState.value.pageSize + index + 1,
+      }))
+      pageState.value.total = res.data.total
+      pageState.value.loaded = true
+      return true
+    } catch {
+      pageState.value.list = []
+      pageState.value.total = 0
+      return false
     } finally {
-      isLoading.value = false
+      if (!fetchProjectLatest.isLoading.value) isLoading.value = false
     }
   }
 

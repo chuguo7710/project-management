@@ -1,3 +1,21 @@
+<script setup lang="ts">
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+
+// 路由名 → 菜单 index
+const MENU_INDEX: Record<string, string> = {
+  dashboard: '1',
+  projectList: '2-1',
+  projectManage: '2-2',
+  task: '3',
+  user: '4',
+  setting: '5',
+}
+
+const activeIndex = computed(() => MENU_INDEX[String(route.name)] ?? '')
+</script>
 <template>
   <div class="sidebar">
     <h2 class="logo">御驾亲征</h2>
@@ -5,7 +23,7 @@
       router
       active-text-color="#ffd04b"
       background-color="#545c64"
-      default-active="1"
+      :default-active="activeIndex"
       class="sidebarMenu"
       text-color="#fff"
     >

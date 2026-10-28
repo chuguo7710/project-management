@@ -3,6 +3,8 @@ package com.example.modules.project.controller;
 import com.example.common.annotation.RequireRole;
 import com.example.common.enums.Role;
 import com.example.common.utils.Result;
+import com.example.modules.project.dto.AddMemberDTO;
+import com.example.modules.project.dto.EditProjectDTO;
 import com.example.modules.project.dto.ProjectCreateDTO;
 import com.example.modules.project.dto.ProjectSearchDTO;
 import com.example.modules.project.service.ProjectService;
@@ -46,9 +48,17 @@ public class ProjectController {
 
     /** 删除项目 */
     @RequireRole({Role.ADMIN, Role.ROOT})
-    @DeleteMapping("/{id}")
-    public Result<?> deleteProject(@PathVariable Long id) {
-        projectService.removeProject(id);
+    @DeleteMapping("/{projectId}")
+    public Result<?> deleteProject(@PathVariable Long projectId) {
+        projectService.removeProject(projectId);
+        return Result.success();
+    }
+
+    /** 更新项目 */
+    @RequireRole({Role.ADMIN, Role.ROOT})
+    @PutMapping("/{projectId}")
+    public Result<?> updateProject(@PathVariable Long projectId, @Valid @RequestBody EditProjectDTO editProjectDTO) {
+        projectService.changeProject(projectId, editProjectDTO);
         return Result.success();
     }
 
@@ -60,8 +70,8 @@ public class ProjectController {
 
     /** 添加项目成员 */
     @PostMapping("/{projectId}/members")
-    public Result<?> addProjectMember(@PathVariable Long projectId, @RequestBody Long userId) {
-        projectService.addProjectMember(projectId, userId);
+    public Result<?> addProjectMember(@PathVariable Long projectId, @RequestBody AddMemberDTO addMemberDTO) {
+        projectService.addProjectMember(projectId, addMemberDTO.getUserId());
         return Result.success();
     }
 

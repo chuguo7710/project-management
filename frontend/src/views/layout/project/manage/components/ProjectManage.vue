@@ -2,24 +2,26 @@
 import ProjectCard from './ProjectCard.vue'
 import PageBar from '../../components/PageBar.vue'
 import MemberManageDrawer from './member/MemberManageDrawer.vue'
+import ProjectEditDialog from './edit/ProjectEditDialog.vue'
 
 import { ref, onMounted, computed } from 'vue'
 
 import { ElMessageBox } from 'element-plus'
 
 import type { Project } from '@/types/project'
-import { useProjectDelete } from '../composables/useProjectDelete'
+import { useProject } from '../composables/useProject.ts'
 import { useProjectStore } from '@/stores/project'
 
 // 外部依赖
-const { removeProject } = useProjectDelete()
+const { removeProject } = useProject()
 
 const projectStore = useProjectStore()
 const { manageSlice } = projectStore
 const { pageState, load } = manageSlice
 const projectList = computed(() => pageState.list)
-// 内部数据
-const memberManageRef = ref<InstanceType<typeof MemberManageDrawer> | null>(null)
+// 内部状态
+const memberManageDrawerRef = ref<InstanceType<typeof MemberManageDrawer> | null>(null)
+const editDialogRef = ref<InstanceType<typeof ProjectEditDialog> | null>(null)
 // 事件处理
 const askDelete = async (deletedProject: Project) => {
   try {
@@ -33,8 +35,11 @@ const askDelete = async (deletedProject: Project) => {
   }
   await removeProject(deletedProject.projectId)
 }
-const handleMembers = (project: Project) => {
-  memberManageRef.value?.open(project)
+const handleMembersDrawer = (project: Project) => {
+  memberManageDrawerRef.value?.open(project)
+}
+const handleEditDialog = (project: Project) => {
+  editDialogRef.value?.open(project)
 }
 // 派生
 const hasProject = computed(() => projectList.value.length > 0)
@@ -54,9 +59,10 @@ onMounted(() => {
     <ProjectCard
       v-for="project in projectList"
       :key="project.displayedId"
-      :currentProject="project"
+      :project="project"
       @delete="askDelete"
-      @members="handleMembers"
+      @members="handleMembersDrawer"
+      @edit="handleEditDialog"
     />
     <!-- 分页栏 -->
     <PageBar
@@ -68,7 +74,9 @@ onMounted(() => {
       @change="load()"
     />
     <!-- 成员管理抽屉 -->
-    <MemberManageDrawer ref="memberManageRef" />
+    <MemberManageDrawer ref="memberManageDrawerRef" />
+    <!-- 编辑项目弹窗 -->
+    <ProjectEditDialog ref="editDialogRef" />
   </div>
 </template>
 <style scoped>

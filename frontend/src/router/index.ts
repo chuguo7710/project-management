@@ -55,6 +55,11 @@ const router = createRouter({
           ],
         },
         {
+          path: 'task/:projectId?',
+          name: 'task',
+          component: () => import('@/views/layout/task/TaskView.vue'),
+        },
+        {
           path: 'user',
           name: 'user',
           component: () => import('@/views/layout/user/UserView.vue'),

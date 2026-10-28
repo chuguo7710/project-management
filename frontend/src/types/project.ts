@@ -65,6 +65,13 @@ export interface ProjectMember {
   joinTime: string
 }
 
+// 项目状态
+export interface ProjectUpdatePayload {
+  projectName: string
+  status: number
+  description: string
+}
+
 export const PROJECT_STATUS: Record<number, { class: string; text: string }> = {
   1: { class: 'dot-active', text: '进行中' },
   2: { class: 'dot-stop', text: '已暂停' },

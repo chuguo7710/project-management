@@ -4,29 +4,17 @@ import { ref } from 'vue'
 import { useProjectStore } from '@/stores/project'
 import { storeToRefs } from 'pinia'
 
-// props
-const open = () => {
-  isCreateProjectDialogVisible.value = true
-}
-defineExpose({ open })
 // 外部依赖
 const projectStore = useProjectStore()
 const { projectForm, isCreateProjectLoading } = storeToRefs(projectStore)
+// 内部状态
+const visible = ref<boolean>(false)
 // 事件处理
 const submitDialog = async () => {
-  const isSuccess = await projectStore.createNewProject()
-  if (isSuccess) {
-    closeDialog()
-  }
+  const isSuccessful = await projectStore.createNewProject()
+  if (!isSuccessful) return
+  visible.value = false
 }
-const closeDialog = () => {
-  isCreateProjectDialogVisible.value = false
-  setTimeout(() => {
-    projectStore.resetForm()
-  }, 500)
-}
-// 内部状态
-const isCreateProjectDialogVisible = ref<boolean>(false)
 </script>
 <template>
   <!-- 项目创建按钮-->
@@ -37,15 +25,12 @@ const isCreateProjectDialogVisible = ref<boolean>(false)
     content="新增项目"
     show-after="500"
   >
-    <el-button
-      class="create-project-btn"
-      type="primary"
-      @click="isCreateProjectDialogVisible = true"
+    <el-button class="create-project-btn" type="primary" @click="visible = true"
       ><el-icon><plus /></el-icon
     ></el-button>
   </el-tooltip>
   <!-- 项目创建Dialog -->
-  <el-dialog v-model="isCreateProjectDialogVisible" title="项目创建信息" width="500">
+  <el-dialog v-model="visible" title="项目创建信息" width="500" @closed="projectStore.resetForm()">
     <el-form label-position="right" label-width="auto" :model="projectForm">
       <el-form-item label="项目名称">
         <el-input
@@ -78,7 +63,7 @@ const isCreateProjectDialogVisible = ref<boolean>(false)
     </el-form>
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="closeDialog">取消</el-button>
+        <el-button @click="visible = false">取消</el-button>
         <el-button type="primary" :loading="isCreateProjectLoading" @click="submitDialog">
           创建
         </el-button>

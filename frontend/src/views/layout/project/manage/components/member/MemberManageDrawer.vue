@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import MemberCard from './MemberCard.vue'
+import AddMemberDialog from './MemberAddDialog.vue'
 import { ref } from 'vue'
 
 import { ElMessageBox } from 'element-plus'
@@ -9,17 +10,22 @@ import { useProjectMembers } from '@/views/layout/project/manage/composables/use
 
 // 外部依赖
 const manageProjectMembersSlice = useProjectMembers()
-const { list, searchProjectMembers, removeProjectMember, isSearchMemberLoading } =
-  manageProjectMembersSlice
-// 内部数据
+const { list, searchProjectMembers, removeProjectMember } = manageProjectMembersSlice
+// 内部状态
 const memberDrawer = ref<boolean>(false)
+const addMemberDialogRef = ref<InstanceType<typeof AddMemberDialog> | null>(null)
 const currentProject = ref<Project | null>(null)
 const activeCardId = ref<number | null>(null)
+// 派生
 const toggleCard = (member: ProjectMember) => {
   activeCardId.value = activeCardId.value === member.userId ? null : member.userId
 }
 // 事件处理
 const handleDetail = () => {}
+const openAddDialog = () => {
+  if (!currentProject.value) return
+  addMemberDialogRef.value?.open(currentProject.value)
+}
 const askRemove = async (member: ProjectMember) => {
   if (!currentProject.value) return
   try {
@@ -37,13 +43,21 @@ const askRemove = async (member: ProjectMember) => {
     currentProject.value.memberCount = list.value.length
   }
 }
+
+const addMemberSuccess = async (project: Project) => {
+  currentProject.value = project
+  if (!currentProject.value) return
+  await searchProjectMembers(currentProject.value.projectId)
+  currentProject.value.memberCount = list.value.length
+}
+// 对外暴露
 const open = async (project: Project) => {
+  if (!project) throw new Error('project is required')
   currentProject.value = project
   activeCardId.value = null
   const isSearched = await searchProjectMembers(project.projectId)
-  if (isSearched) {
-    memberDrawer.value = true
-  }
+  if (!isSearched) return
+  memberDrawer.value = true
 }
 defineExpose({
   open,
@@ -67,11 +81,14 @@ defineExpose({
             @remove="askRemove"
           />
         </div>
-        <div class="member-add">
+        <!-- 添加成员按钮 -->
+        <div class="member-add" @click="openAddDialog">
           <el-icon><Plus /></el-icon>
         </div>
       </template>
     </el-drawer>
+    <!-- 添加成员弹窗 -->
+    <AddMemberDialog ref="addMemberDialogRef" @success="addMemberSuccess" />
   </div>
 </template>
 <style scoped lang="scss">

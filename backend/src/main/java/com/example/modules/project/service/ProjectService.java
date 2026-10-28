@@ -1,5 +1,6 @@
 package com.example.modules.project.service;
 
+import com.example.modules.project.dto.EditProjectDTO;
 import com.example.modules.project.dto.ProjectCreateDTO;
 import com.example.modules.project.dto.ProjectSearchDTO;
 import com.example.modules.project.entity.Project;
@@ -20,7 +21,10 @@ public interface ProjectService {
     void addProject(ProjectCreateDTO projectCreateDTO);
 
     /** 删除项目 */
-    void removeProject(Long id);
+    void removeProject(Long projectId);
+
+    /** 更新项目 */
+    void changeProject(Long projectId, EditProjectDTO editProjectDTO);
 
     /** 查询项目成员 */
     List<ProjectMemberVO> searchProjectMembers(Long projectId);
@@ -30,4 +34,6 @@ public interface ProjectService {
 
     /** 删除项目成员 */
     void removeProjectMember(Long projectId, Long userId);
+
+
 }
