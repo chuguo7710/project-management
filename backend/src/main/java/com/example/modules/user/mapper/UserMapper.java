@@ -30,4 +30,7 @@ public interface UserMapper {
     @Insert("INSERT INTO accounts (username, password) VALUES (#{username}, #{password})")
     int insertUser(RegisterDTO registerDTO);
 
+    /**根据账户ID查询账户名 */
+    @Select("SELECT username FROM accounts WHERE user_id = #{userId}")
+    String selectUsernameByUserId(@Param("userId") Long userId);
 }

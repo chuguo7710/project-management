@@ -95,11 +95,11 @@ put:/project/{projectId} (payload)项目编辑
 组件变量绑定：Ref
 父件绑定子件视图：父件is...Visible，子件visible
 
-api：insert/delete/update/select...
+api：insert/delete/update/create...
 useRequest：...Latest/Dedupe/Queue/Coalesce
 composables：add/remove/change/search...
 vue：handleAdd/Remove/Change/Search/...
 
 
 
-
+root发任务需特殊标记，不然不知道是谁（root可能不是项目官员）

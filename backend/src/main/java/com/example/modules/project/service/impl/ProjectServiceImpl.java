@@ -130,7 +130,7 @@ public class ProjectServiceImpl implements ProjectService {
     public void changeProject(Long projectId, EditProjectDTO editProjectDTO) {
         // 检测身份
         Long userId = UserContext.get().getUserId();
-        Integer myProjectRole = projectMapper.selectMyProjectRoleByProjectIdAndUserId(editProjectDTO.getProjectId(), userId);
+        Integer myProjectRole = projectMapper.selectMyProjectRoleByProjectIdAndUserId(projectId, userId);
         if (UserContext.get().getRole() != Role.ROOT && (!Objects.equals(myProjectRole, ProjectRole.OWNER.getCode()))) {
             log.warn("账户无权限修改项目，项目ID：{}", projectId);
             throw new BusinessException("无权限修改项目");
@@ -162,6 +162,7 @@ public class ProjectServiceImpl implements ProjectService {
             log.warn("查询项目成员失败，项目ID：{}", projectId);
             throw new BusinessException("项目不存在");
         }
+        log.info("项目成员查询完成，项目ID：{}", projectId);
         return projectMemberMapper.selectMemberByProjectId(projectId);
     }
 
@@ -193,6 +194,7 @@ public class ProjectServiceImpl implements ProjectService {
                 log.warn("项目成员添加失败，项目ID：{}", projectId);
                 throw new BusinessException("项目成员添加失败");
             }
+            log.info("项目成员添加完成，项目ID：{}", projectId);
         }  catch (DuplicateKeyException e) {
             log.warn("账户{}已是项目成员，项目ID：{}", userId, projectId);
             throw new BusinessException("该账户已是项目成员");
@@ -228,6 +230,7 @@ public class ProjectServiceImpl implements ProjectService {
             log.warn("项目成员删除失败，项目ID：{}", projectId);
             throw new BusinessException("项目成员删除失败");
         }
+        log.info("项目成员删除成功，项目ID：{}", projectId);
     }
 
 
