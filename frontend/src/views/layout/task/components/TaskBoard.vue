@@ -4,11 +4,16 @@ import TaskCreateDialog from './TaskCreateDialog.vue'
 import TaskDetailDrawer from './TaskDetailDrawer.vue'
 import { ref, computed, watch } from 'vue'
 
+import { ElMessageBox } from 'element-plus'
+
 import type { TaskVO, TaskCreatePayload, TaskStatus } from '@/types/task'
+import { TASK_COLUMNS, TASK_STATUS } from '@/types/task'
+
 import { useTask } from '../composables/useTask'
 
 // 外部依赖
-const { searchTaskList, addTask, TabTasksMap, isAddTaskLoading } = useTask()
+const { searchTaskList, addTask, TabTasksMap, isAddTaskLoading, removeTask, changeTaskStatus } =
+  useTask()
 // props
 const props = defineProps<{
   projectId: number
@@ -26,7 +31,6 @@ const taskCreateDialogRef = ref<InstanceType<typeof TaskCreateDialog> | null>(nu
 const taskDetailDrawerRef = ref<InstanceType<typeof TaskDetailDrawer> | null>(null)
 // 派生
 const currentTabTasks = computed(() => TabTasksMap.value.get(props.projectId) ?? [])
-const currentTask = ref<TaskVO | null>(null)
 // 事件处理
 /** 创建任务 */
 const createTask = async (taskCreatePayload: TaskCreatePayload) => {
@@ -37,22 +41,45 @@ const createTask = async (taskCreatePayload: TaskCreatePayload) => {
 }
 /** 打开任务详情 */
 const openTaskDetail = (task: TaskVO) => {
-  currentTask.value = task
-  taskDetailDrawerRef.value?.open()
+  taskDetailDrawerRef.value?.open(task)
+}
+/** 移除任务 */
+const handleTaskRemove = (task: TaskVO) => {
+  ElMessageBox.confirm(`确认删除任务「${task.title}」吗？`, '删除任务', {
+    type: 'warning',
+  })
+    .then(async () => {
+      const isRemoved = await removeTask(task.taskId)
+      if (!isRemoved) return
+      taskDetailDrawerRef.value?.close()
+      await searchTaskList(props.projectId)
+    })
+    .catch(() => {})
+}
+/** 改变任务状态 */
+const handleTaskStatusChange = async (task: TaskVO, status: TaskStatus) => {
+  if (task.status === status) return
+  ElMessageBox.confirm(
+    `确认将任务状态改为「${TASK_STATUS[status].statusChangeText}」吗？`,
+    '修改任务状态',
+    {
+      type: 'warning',
+    },
+  )
+    .then(async () => {
+      const isUpdated = await changeTaskStatus(task.taskId, status)
+      if (!isUpdated) return
+      taskDetailDrawerRef.value?.close()
+      await searchTaskList(props.projectId)
+    })
+    .catch(() => {})
 }
 
-// 三列固定：对应 task.status 1 / 2 / 3
-const COLUMNS = [
-  { status: 1, label: '待办' },
-  { status: 2, label: '进行中' },
-  { status: 3, label: '已完成' },
-] as const
-
 const columns = computed(() =>
-  COLUMNS.map((col) => ({
+  Object.values(TASK_COLUMNS).map((col) => ({
     ...col,
     tasks: currentTabTasks.value.filter((task) => task.status === col.status),
-    creatable: col.status !== 3,
+    creatable: col.status !== 3, // 已完成列不允许新建任务
   })),
 )
 </script>
@@ -63,7 +90,7 @@ const columns = computed(() =>
     <section v-for="col in columns" :key="col.status" class="task-column">
       <!-- 列头：列名 + 任务数 + 新建按钮 -->
       <header class="task-column__head">
-        <span class="task-column__label">{{ col.label }}</span>
+        <span class="task-column__label">{{ col.text }}</span>
         <span class="task-column__count">{{ col.tasks.length }}</span>
         <el-button
           v-if="col.creatable"
@@ -94,7 +121,11 @@ const columns = computed(() =>
       @create="createTask"
     />
     <!-- 任务详情抽屉 -->
-    <TaskDetailDrawer ref="taskDetailDrawerRef" :task="currentTask" />
+    <TaskDetailDrawer
+      ref="taskDetailDrawerRef"
+      @remove="handleTaskRemove"
+      @status-change="handleTaskStatusChange"
+    />
   </div>
 </template>
 

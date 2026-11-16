@@ -1,15 +1,15 @@
 import { ref } from 'vue'
-import { userLogin } from '@/api/user'
+import { userLogin } from '@/api/auth'
 
 import { ElMessage } from 'element-plus'
 
 import type { LoginFormData } from '@/types/user'
-import { useUserStore } from '@/stores/user'
+import { useAuthStore } from '@/stores/auth'
 import { useRequest } from '@/composables/useRequest'
 
 export const useLogin = () => {
   // 外部依赖
-  const useStore = useUserStore()
+  const useStore = useAuthStore()
   const loginDedupe = useRequest(userLogin, { mode: 'dedupe' })
   // 内部状态
   const isLoginLoading = ref<boolean>(false)

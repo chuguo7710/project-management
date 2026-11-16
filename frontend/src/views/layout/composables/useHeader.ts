@@ -1,5 +1,5 @@
-import { useUserStore } from '@/stores/user'
-const { logout } = useUserStore()
+import { useAuthStore } from '@/stores/auth'
+const { logout } = useAuthStore()
 
 export const useHeader = () => {
   const handleCommand = (command: string) => {

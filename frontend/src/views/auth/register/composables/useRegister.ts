@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import { userRegister } from '@/api/user'
+import { userRegister } from '@/api/auth'
 
 import { ElMessage } from 'element-plus'
 

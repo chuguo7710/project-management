@@ -4,18 +4,16 @@ import { computed, ref } from 'vue'
 
 import { TASK_PRIORITY, TASK_STATUS } from '@/types/task'
 import type { TaskStatus, TaskVO } from '@/types/task'
+import { ArrowUpBold } from '@element-plus/icons-vue'
 
-// props
-const props = defineProps<{
-  task: TaskVO | null
-}>()
 // emits
 const emit = defineEmits<{
-  'status-change': [status: TaskStatus]
-  remove: []
+  'status-change': [task: TaskVO, status: TaskStatus]
+  remove: [task: TaskVO]
 }>()
 // 内部状态
 const visible = ref<boolean>(false)
+const currentTask = ref<TaskVO | null>(null)
 // 常量
 const NEXT_LABEL: Record<TaskStatus, string> = {
   1: '重新打开',
@@ -23,35 +21,41 @@ const NEXT_LABEL: Record<TaskStatus, string> = {
   3: '标记完成',
 }
 // 派生 · 展示
-const statusMeta = computed(() => (props.task ? TASK_STATUS[props.task.status] : null))
-const priorityMeta = computed(() => TASK_PRIORITY[props.task?.priority ?? 2])
-const assigneeInitial = computed(() => (props.task?.assigneeName ?? '?').slice(0, 1))
-const isDone = computed(() => props.task?.status === 3)
-// 派生 · 状态推进：已完成 → 回到待办；待办 → 进行中；进行中 → 已完成
-const nextStatus = computed<TaskStatus>(() => {
-  const status = props.task?.status ?? 1
-  if (status === 1) return 2
-  if (status === 2) return 3
-  return 1
-})
-const nextLabel = computed(() => NEXT_LABEL[nextStatus.value])
+const statusMeta = computed(() =>
+  currentTask.value ? TASK_STATUS[currentTask.value.status] : null,
+)
+const priorityMeta = computed(() => TASK_PRIORITY[currentTask.value?.priority ?? 2])
+const assigneeInitial = computed(() => (currentTask.value?.assigneeName ?? '?').slice(0, 1))
+const isDone = computed(() => currentTask.value?.status === 3)
 // 派生 · 日期：截止日只到「天」，时间精确到分
 const deadlineText = computed(() =>
-  props.task?.deadline ? dayjs(props.task.deadline).format('YYYY-MM-DD') : '—',
+  currentTask.value?.deadline ? dayjs(currentTask.value.deadline).format('YYYY-MM-DD') : '—',
 )
 const overdueDays = computed(() => {
-  if (!props.task?.deadline || isDone.value) return 0
-  const diff = dayjs().startOf('day').diff(dayjs(props.task.deadline).startOf('day'), 'day')
+  if (!currentTask.value?.deadline || isDone.value) return 0
+  const diff = dayjs().startOf('day').diff(dayjs(currentTask.value.deadline).startOf('day'), 'day')
   return diff > 0 ? diff : 0
 })
 const createTimeText = computed(() =>
-  props.task?.createTime ? dayjs(props.task.createTime).format('YYYY-MM-DD HH:mm') : '—',
+  currentTask.value?.createTime
+    ? dayjs(currentTask.value.createTime).format('YYYY-MM-DD HH:mm')
+    : '—',
 )
 const completedAtText = computed(() =>
-  props.task?.completedAt ? dayjs(props.task.completedAt).format('YYYY-MM-DD HH:mm') : '—',
+  currentTask.value?.completedAt
+    ? dayjs(currentTask.value.completedAt).format('YYYY-MM-DD HH:mm')
+    : '—',
 )
+// 事件处理
+/** 改变状态 */
+const statusChange = (status: TaskStatus) => {
+  if (!currentTask.value) return
+  if (status === currentTask.value?.status) return
+  emit('status-change', currentTask.value, status)
+}
 // 对外暴露
-const open = () => {
+const open = (task: TaskVO) => {
+  currentTask.value = task
   visible.value = true
 }
 const close = () => {
@@ -68,11 +72,13 @@ defineExpose({
     <template #header>
       <div class="detail-head">
         <span class="detail-head__title">任务详情</span>
-        <span v-if="task?.projectName" class="detail-head__project">{{ task.projectName }}</span>
+        <span v-if="currentTask?.projectName" class="detail-head__project">{{
+          currentTask.projectName
+        }}</span>
       </div>
     </template>
     <template #default>
-      <div v-if="task" class="detail">
+      <div v-if="currentTask" class="detail">
         <!-- ① 可滚动区：先「是什么」，再「谁/什么时候」，最后「详细说」 -->
         <div class="detail__scroll">
           <!-- 状态 / 优先级 / 编号 -->
@@ -87,22 +93,22 @@ defineExpose({
               <i class="detail__dot" :style="{ backgroundColor: priorityMeta.color }"></i>
               {{ priorityMeta.text }}
             </span>
-            <span class="detail__id">#{{ task.taskId }}</span>
+            <span class="detail__id">#{{ currentTask.taskId }}</span>
           </div>
 
           <!-- 标题 -->
-          <h2 class="detail__title">{{ task.title }}</h2>
+          <h2 class="detail__title">{{ currentTask.title }}</h2>
 
           <!-- 信息表：左列标签、右列值 -->
           <dl class="detail__meta">
             <dt>负责人</dt>
             <dd>
               <span class="detail__avatar">{{ assigneeInitial }}</span>
-              {{ task.assigneeName ?? '未指派' }}
+              {{ currentTask.assigneeName ?? '未指派' }}
             </dd>
 
             <dt>创建人</dt>
-            <dd>{{ task.creatorName ?? '—' }}</dd>
+            <dd>{{ currentTask.creatorName ?? '—' }}</dd>
 
             <dt>截止日期</dt>
             <dd>
@@ -123,20 +129,39 @@ defineExpose({
 
           <!-- 描述 -->
           <h3 class="detail__subtitle">描述</h3>
-          <p v-if="task.description" class="detail__desc">{{ task.description }}</p>
+          <p v-if="currentTask.description" class="detail__desc">{{ currentTask.description }}</p>
           <p v-else class="detail__desc is-empty">还没有填写描述</p>
         </div>
 
         <!-- ② 底部操作条：破坏性操作在左，主操作在右（关闭由抽屉右上角 × 负责） -->
         <footer class="detail__footer">
-          <el-button type="danger" plain size="default" @click="emit('remove')">删除</el-button>
-          <el-button
-            type="primary"
-            size="default"
-            @click="emit('status-change', nextStatus)"
+          <el-button type="danger" plain size="default" @click="emit('remove', currentTask)"
+            >删除</el-button
           >
-            {{ nextLabel }}
-          </el-button>
+          <el-dropdown
+            class="status-change-dropdown"
+            placement="top"
+            trigger="click"
+            @command="statusChange"
+          >
+            <el-button type="primary" plain size="default">
+              <span>改变状态</span>
+              <el-icon class="status-change-icon"><ArrowUpBold /></el-icon>
+            </el-button>
+            <template #dropdown>
+              <el-dropdown-menu class="status-change-menu">
+                <el-dropdown-item
+                  :class="{ 'is-active': status.val === currentTask.status }"
+                  :divided="status.val > 1"
+                  v-for="status in TASK_STATUS"
+                  :key="status.val"
+                  :command="status.val"
+                >
+                  {{ status.text }}
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
         </footer>
       </div>
       <el-empty v-else description="没有选中的任务" />
@@ -303,6 +328,25 @@ defineExpose({
     padding: 12px 20px;
     border-top: 1px solid $border-color;
     background-color: #fff;
+  }
+}
+.status-change-dropdown {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: $primary-color;
+  font-size: 13px;
+  cursor: pointer;
+  .status-change-icon {
+    margin-left: 4px;
+    font-size: 12px;
+  }
+  .status-change-menu {
+    min-width: 120px;
+    .is-active {
+      color: $task-status-active-color;
+      font-style: italic;
+    }
   }
 }
 </style>

@@ -2,9 +2,14 @@ package com.example.modules.user.mapper;
 
 import com.example.common.model.SessionInfo;
 import com.example.modules.user.dto.RegisterDTO;
-import com.example.modules.user.vo.UserAuthInfoVO;
-import com.example.modules.user.vo.UserVO;
+import com.example.modules.user.dto.UserListQueryDTO;
+import com.example.modules.user.dto.UserSearchQueryDTO;
+import com.example.modules.user.vo.auth.UserAuthInfoVO;
+import com.example.modules.user.vo.auth.UserVO;
+import com.example.modules.user.vo.user.UserListVO;
 import org.apache.ibatis.annotations.*;
+
+import java.util.List;
 
 @Mapper
 public interface UserMapper {
@@ -30,7 +35,25 @@ public interface UserMapper {
     @Insert("INSERT INTO accounts (username, password) VALUES (#{username}, #{password})")
     int insertUser(RegisterDTO registerDTO);
 
-    /**根据账户ID查询账户名 */
+    /** 根据账户ID查询账户名 */
     @Select("SELECT username FROM accounts WHERE user_id = #{userId}")
     String selectUsernameByUserId(@Param("userId") Long userId);
+
+    /** 查询用户列表 */
+    List<UserListVO> selectUserList(UserListQueryDTO userListQueryDTO);
+
+    /** 查询用户链表数量 */
+    Long selectUserListCount(UserListQueryDTO userListQueryDTO);
+
+    /** 根据账户ID更新账户状态 */
+    @Update("UPDATE accounts SET status = #{status} WHERE user_id = #{userId}")
+    int updateStatusByUserId(@Param("userId") Long userId, @Param("status") Integer status);
+
+    /** 根据账户ID更新账户角色 */
+    @Update("UPDATE accounts SET role = #{role} WHERE user_id = #{userId}")
+    int updateRoleByUserId(@Param("userId") Long userId, @Param("role") Integer role);
+
+    /** 根据账户ID更改账户密码 */
+    @Update("UPDATE accounts SET password = #{password} WHERE user_id = #{userId}")
+    int updatePasswordByUserId(@Param("userId") Long userId, @Param("password") String password);
 }

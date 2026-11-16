@@ -1,4 +1,4 @@
-package com.example.modules.user.vo;
+package com.example.modules.user.vo.auth;
 
 import lombok.Data;
 

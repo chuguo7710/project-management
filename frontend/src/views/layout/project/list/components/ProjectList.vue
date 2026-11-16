@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import PageBar from '../../components/PageBar.vue'
+import PageBar from '../../../components/PageBar.vue'
 
 import { ref, computed, onMounted } from 'vue'
 import dayjs from 'dayjs'
@@ -48,8 +48,7 @@ onMounted(() => {
       <el-table-column prop="displayedId" label="ID" width="80" />
       <el-table-column prop="projectName" label="项目名称" min-width="150" />
       <el-table-column prop="leaderName" label="负责人" width="120" />
-      <el-table-column label="状态" width="100" />
-      <el-table-column>
+      <el-table-column label="状态" width="100">
         <template #default="{ row }">
           <span :class="statusClass(row.status)"> </span>
           {{ statusText(row.status) }}

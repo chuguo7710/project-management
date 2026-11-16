@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--suppress ALL -->
+<mapper namespace="com.example.modules.user.mapper.UserMapper">
+
+    <sql id="userFilter">
+        <if test="username != null and username != ''">
+            username LIKE CONCAT('%', #{query.username}, '%')
+        </if>
+    </sql>
+
+    <select id="selectUserList" resultType="com.example.modules.user.vo.user.UserListVO">
+        SELECT user_id, username, role, status, create_time
+        FROM accounts
+        <where>
+            <include refid="userFilter"/>
+        </where>
+        ORDER BY create_time DESC, user_id DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <select id="selectUserListCount" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM accounts
+        <where>
+            <include refid="userFilter"/>
+        </where>
+    </select>
+</mapper>

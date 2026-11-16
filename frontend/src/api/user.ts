@@ -1,22 +1,36 @@
 import request from '@/utils/request'
 
-import type { LoginFormData, RegisterFormData, UserAllData } from '@/types/user'
-import type { ApiResult } from '@/types/common'
+import type { ApiResult, PageResult } from '@/types/common'
+import type { User, UserListQuery } from '@/types/user'
 
-/** 登录 */
-export const userLogin = async (signal: AbortSignal, data: LoginFormData) => {
-  const res = await request.post<ApiResult<string>>('/auth/login', data, { signal }) // 传回token
+/** 获取用户列表 */
+export const fetchUserList = async (
+  signal: AbortSignal,
+  query: UserListQuery,
+): Promise<ApiResult<PageResult<User[]>>> => {
+  const res = await request.get<ApiResult<PageResult<User[]>>>('/user/list', {
+    params: query,
+    signal,
+  })
   return res.data
 }
 
-/** 注册 */
-export const userRegister = async (signal: AbortSignal, data: RegisterFormData) => {
-  const res = await request.post<ApiResult>('/auth/register', data, { signal })
+/** 更改用户状态 */
+export const updateUserStatus = async (
+  signal: AbortSignal,
+  userId: number,
+  status: number,
+): Promise<ApiResult> => {
+  const res = await request.put<ApiResult>(`/user/${userId}/status`, { status }, { signal })
   return res.data
 }
 
-/** 获取账户所有数据 */
-export const userFetchAllData = async () => {
-  const res = await request.get<ApiResult<UserAllData>>('/user/me')
+/** 更改用户角色 */
+export const updateUserRole = async (
+  signal: AbortSignal,
+  userId: number,
+  role: number,
+): Promise<ApiResult> => {
+  const res = await request.put<ApiResult>(`/user/${userId}/role`, { role }, { signal })
   return res.data
 }

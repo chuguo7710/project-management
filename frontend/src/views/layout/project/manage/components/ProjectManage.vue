@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import ProjectCard from './ProjectCard.vue'
-import PageBar from '../../components/PageBar.vue'
+import PageBar from '../../../components/PageBar.vue'
 import MemberManageDrawer from './member/MemberManageDrawer.vue'
 import ProjectEditDialog from './edit/ProjectEditDialog.vue'
 

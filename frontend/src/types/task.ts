@@ -47,10 +47,13 @@ export const createEmptyPayload = (): TaskCreatePayload => ({
   projectId: 0,
 })
 
-export const TASK_STATUS: Record<number, { text: string; color: string }> = {
-  1: { text: '待办', color: '#909399' },
-  2: { text: '进行中', color: '#409eff' },
-  3: { text: '已完成', color: '#3cb4ff' },
+export const TASK_STATUS: Record<
+  TaskStatus,
+  { val: TaskStatus; text: string; color: string; statusChangeText: string }
+> = {
+  1: { val: 1, text: '待办', color: '#909399', statusChangeText: '等待处理' },
+  2: { val: 2, text: '进行中', color: '#409eff', statusChangeText: '开始处理' },
+  3: { val: 3, text: '已完成', color: '#3cb4ff', statusChangeText: '标记完成' },
 }
 
 // 颜色与 assets/styles/color.scss 的取值同源：红=高，橙=中，蓝=低
@@ -61,4 +64,10 @@ export const TASK_PRIORITY: Record<
   1: { val: 1, text: '高', color: '#ff3131' },
   2: { val: 2, text: '中', color: '#e6a23c' },
   3: { val: 3, text: '低', color: '#3cb4ff' },
+}
+
+export const TASK_COLUMNS: Record<TaskStatus, { status: TaskStatus; text: string }> = {
+  1: { status: 1, text: '待办' },
+  2: { status: 2, text: '进行中' },
+  3: { status: 3, text: '已完成' },
 }

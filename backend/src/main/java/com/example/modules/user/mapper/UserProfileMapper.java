@@ -1,6 +1,6 @@
 package com.example.modules.user.mapper;
 
-import com.example.modules.user.vo.UserProfileVO;
+import com.example.modules.user.vo.auth.UserProfileVO;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;

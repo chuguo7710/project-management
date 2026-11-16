@@ -8,3 +8,8 @@ export interface PageResult<T> {
   records: T
   total: number
 }
+
+export interface PageParams {
+  page: number
+  pageSize: number
+}

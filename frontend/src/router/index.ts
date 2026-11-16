@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { useUserStore } from '../stores/user'
+import { useAuthStore } from '../stores/auth'
 import { ElMessage } from 'element-plus'
 
 const router = createRouter({
@@ -76,7 +76,7 @@ const router = createRouter({
 
 // 守卫
 router.beforeEach((to, from) => {
-  const userStore = useUserStore()
+  const userStore = useAuthStore()
   console.log('路由守卫触发,token:', userStore.token, 'to:', to.name, 'from:', from.name)
   // 有token时读取token并验证
   if (userStore.token) {

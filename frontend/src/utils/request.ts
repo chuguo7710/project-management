@@ -1,6 +1,6 @@
 import axios from 'axios'
 import type { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 'axios'
-import { useUserStore } from '../stores/user'
+import { useAuthStore } from '../stores/auth'
 import { ElMessage } from 'element-plus'
 import router from '@/router/index'
 
@@ -14,7 +14,7 @@ const request: AxiosInstance = axios.create({
 request.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     // 从本地存储中获取token并上传
-    const store = useUserStore()
+    const store = useAuthStore()
     if (store.token) {
       config.headers.Authorization = `Bearer ${store.token}` // 将token添加到请求头中
     }
@@ -46,7 +46,7 @@ request.interceptors.response.use(
       switch (status) {
         case 401: // 登录过期
           ElMessage.error(error.response.data?.msg ?? '登录过期，请重新登录')
-          const store = useUserStore()
+          const store = useAuthStore()
           store.logout()
           router.push({ name: 'login' })
           break

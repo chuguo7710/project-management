@@ -1,75 +1,59 @@
-import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import router from '@/router'
-import { userFetchAllData } from '@/api/user'
+import { ref } from 'vue'
+import { useRequest } from '@/composables/useRequest'
+import { fetchUserList } from '@/api/user'
 
-import type { UserData, UserProfileData } from '@/types/user'
+import { ElMessage } from 'element-plus'
+
+import type { User, UserListQuery } from '@/types/user'
 
 export const useUserStore = defineStore('user', () => {
+  // 外部依赖
+  const fetchUserListLatest = useRequest(fetchUserList, { mode: 'latest' })
   // 内部状态
-  const isDataFetched = ref<boolean>(false)
+  const userList = ref<User[]>([])
+  const isSearchLoading = ref(false)
+  const pageState = ref<{ query: UserListQuery; total: number; loaded: boolean }>({
+    query: {
+      page: 1,
+      pageSize: 10,
+      username: '',
+    },
+    total: 0,
+    loaded: false,
+  })
 
-  //内部数据
-  const token = ref<string>(localStorage.getItem('app_token') || '')
-  const userData = ref<UserData | null>(null)
-  const userProfileData = ref<UserProfileData | null>(null)
-
-  // 基础方法
-  /** 重置store方法 */
-  const resetStore = () => {
-    token.value = ''
-    userData.value = null
-    userProfileData.value = null
-    isDataFetched.value = false
-  }
-  /** 设置token方法 */
-  const setToken = (newToken: string) => {
-    token.value = newToken
-    localStorage.setItem('app_token', newToken)
-  }
-  /** 设置账户数据方法 */
-  const setUserData = (newUserData: UserData | null) => {
-    userData.value = newUserData
-  }
-  /** 设置用户资料数据方法 */
-  const setUserProfileData = (newUserProfileData: UserProfileData | null) => {
-    userProfileData.value = newUserProfileData
-  }
-  /** 退出登录方法 */
-  const logout = () => {
-    const prefix = 'app'
-    Object.keys(localStorage)
-      .filter((key) => key.startsWith(prefix))
-      .forEach((key) => localStorage.removeItem(key))
-    resetStore()
-    router.push({ name: 'login' })
-  }
-
-  //API方法
-  /** 获取用户所有数据 */
-  const fetchUserAllData = async (): Promise<boolean> => {
-    if (isDataFetched.value) return true
+  // 外部接口
+  /** 查询用户列表 */
+  const searchUserList = async (page?: number): Promise<boolean> => {
+    if (page !== undefined) pageState.value.query.page = page
+    isSearchLoading.value = true
 
     try {
-      const res = await userFetchAllData()
-      userData.value = res.data.userVO
-      userProfileData.value = res.data.userProfileVO
-      isDataFetched.value = true
+      const result = await fetchUserListLatest.run(pageState.value.query)
+      if (result === undefined) return false
+      userList.value = result.data.records
+      pageState.value.total = result.data.total
       return true
-    } catch {
+    } catch (error) {
       return false
+    } finally {
+      if (!fetchUserListLatest.isLoading.value) {
+        isSearchLoading.value = false
+      }
     }
   }
 
+  /** 清空查询条件 */
+  const resetQuery = () => {
+    pageState.value.query.username = ''
+  }
+
   return {
-    isDataFetched,
-    token,
-    userData,
-    userProfileData,
-    setToken,
-    setUserData,
-    setUserProfileData,
-    logout,
-    fetchUserAllData,
+    userList,
+    isSearchLoading,
+    pageState,
+    searchUserList,
+    resetQuery,
   }
 })

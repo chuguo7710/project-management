@@ -7,7 +7,7 @@ import { storeToRefs } from 'pinia'
 import { fetchProjectMembers } from '@/api/project'
 
 import { useRequest } from '@/composables/useRequest'
-import { useUserStore } from '@/stores/user'
+import { useAuthStore } from '@/stores/auth'
 import { TASK_PRIORITY, TASK_STATUS } from '@/types/task'
 import type { TaskCreatePayload, TaskStatus } from '@/types/task'
 import type { ProjectMember } from '@/types/project'
@@ -23,7 +23,7 @@ const emit = defineEmits<{
   create: [payload: TaskCreatePayload]
 }>()
 // 外部依赖
-const userStore = useUserStore()
+const userStore = useAuthStore()
 const { userData } = storeToRefs(userStore)
 const fetchProjectMembersLatest = useRequest(fetchProjectMembers, { mode: 'latest' })
 // 内部状态

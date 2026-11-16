@@ -2,11 +2,11 @@
 import logoUrl from '@/assets/img/logo-128.png'
 
 import { storeToRefs } from 'pinia'
-import { useUserStore } from '@/stores/user'
+import { useAuthStore } from '@/stores/auth'
 import { useHeader } from '../composables/useHeader'
 
-const store = useUserStore()
-const { userProfileData } = storeToRefs(store)
+const store = useAuthStore()
+const { userData } = storeToRefs(store)
 const { handleCommand } = useHeader()
 </script>
 <template>
@@ -16,8 +16,8 @@ const { handleCommand } = useHeader()
     <div class="userDisplay">
       <el-dropdown class="dropdown" placement="bottom" trigger="click" @command="handleCommand">
         <div class="link">
-          <el-avatar :src="userProfileData?.avatar" icon="UserFilled" />
-          <span class="nicknameSlot">{{ userProfileData?.nickname ?? '未命名' }}</span>
+          <el-avatar :src="userData?.avatar" icon="UserFilled" />
+          <span class="nicknameSlot">{{ userData?.username ?? '未命名' }}</span>
           <el-icon><ArrowRight /></el-icon>
         </div>
         <template #dropdown>

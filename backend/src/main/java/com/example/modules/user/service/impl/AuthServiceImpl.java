@@ -5,7 +5,7 @@ import com.example.common.exception.BusinessException;
 import com.example.common.utils.JwtTools;
 import com.example.modules.user.dto.LoginDTO;
 import com.example.modules.user.dto.RegisterDTO;
-import com.example.modules.user.vo.UserAuthInfoVO;
+import com.example.modules.user.vo.auth.UserAuthInfoVO;
 import com.example.modules.user.mapper.UserMapper;
 import com.example.modules.user.mapper.UserProfileMapper;
 import com.example.modules.user.service.AuthService;
